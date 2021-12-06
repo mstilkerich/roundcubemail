@@ -247,7 +247,6 @@ class rcmail_oauth
                             foreach ($this->options['identity_fields'] as $field) {
                                 if (isset($identity[$field])) {
                                     $username = $identity[$field];
-                                    unset($data['id_token']);
                                     break;
                                 }
                             }
@@ -290,6 +289,9 @@ class rcmail_oauth
                         'username' => $username,
                         'identity' => $identity,
                     ]));
+
+                    // remove some data we don't want to store in session
+                    unset($data['id_token']);
 
                     // return auth data
                     return [
@@ -429,7 +431,7 @@ class rcmail_oauth
     protected function mask_auth_data(&$data)
     {
         // compute absolute token expiration date
-        $data['expires'] = time() + $data['expires_in'] - 600;
+        $data['expires'] = time() + $data['expires_in'] - 10;
 
         // encrypt refresh token if provided
         if (isset($data['refresh_token'])) {

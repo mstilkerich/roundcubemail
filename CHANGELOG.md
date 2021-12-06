@@ -2,8 +2,10 @@
 
 ## Unreleased
 
+- Added support for PHP 8.1 (#8151)
 - Dropped support for PHP < 7.3 (#7976)
 - Dropped support for strftime-like format (with % sign) in date and time format configuration
+- Moved the Classic and Larry skins to their own repository (#8271)
 - SQLite: Use foreign keys, require SQLite >= 3.6.19
 - Replace Endroid QrCode with BaconQrCode (#8173)
 - Support responses (snippets) in HTML format (#5315)
@@ -13,19 +15,62 @@
 - Add ability to mark multiple messages as not deleted at once (#5133)
 - Add possibility to disable line-wrapping of sent mail body (#5101)
 - Improve auto-wrapping of plain text messages on preview and reply, don't wrap non-format=flowed content (#6974)
-- Support displaying RTF content (including encapsulated HTML) from a TNEF attachment
-- Newmail_notifier: Improved the notification sound (#8155)
+- Improve searching by sender/recipient headers, support Reply-To and Followup-To (#6582)
 - Add option to control links handling behavior on html to text conversion (#6485)
-- Disable the default spellchecker option using spell.roundcube.net (#8182)
+- Add 'loginform_content' plugin hook (#8273, #6569)
+- OAuth: pass 'id_token' to 'oauth_login' plugin hook (#8214)
+- OAuth: fix expiration of short-lived oauth tokens (#8147)
+- OAuth: fix relative path to assets if /index.php/foo/bar url is used (#8144)
 - SMTP: If requested use TLS also without authentication (#4590, #8111)
+- Display a generic error page on initial DB/configuration errors (#8222)
+- Display telephone numbers as tel: links (#8240)
+- Autologout: A new plugin to auto log out users with a POST request (#8270)
 - Enigma: Upgrade to OpenPGP.js v5.0
+- Identicon: Make background color of the image to match the current skin colors (#8256)
+- Newmail_notifier: Update favicon to match the current favicon style and size (#7826)
 - Password: Remove password_blowfish_cost option, in favor of password_algorithm_options
 - Password: Remove support for password_algorithms crypt, hash and cram-md5
 - Password: Remove support for %c, %d, %n, %q variables in password_query
 - Password: Add support for passwords based on PHP's password_hash() function (#7724)
 - Password: Verify current password with IMAP (#8142)
 - Password: Improve handling errors on executed commands (#8200)
+- Password: Add Mailcow driver (#8291)
+- Fix compatibility with Referrer-Policy: "strict-origin" (#8170)
 - Fix locked SQLite database for the CLI tools (#8035)
+- Fix Makefile on Linux (#8211)
+- Fix so folder search parameters are honored by subscriptions_option plugin (#8312)
+- Fix password change with Directadmin driver (#8322, #8329)
+- Fix so css files in plugins/jqueryui/themes will be minified too (#8337)
+
+## Release 1.5.1
+
+- Fix importing contacts with no email address (#8227)
+- Fix so session's search scope is not used if search is not active (#8199)
+- Fix some PHP8 warnings (#8239)
+- Fix so dark mode state is retained after closing the browser (#8237)
+- Fix bug where new messages were not added to the list on refresh if skip_deleted=true (#8234)
+- Fix colors on "Show source" page in dark mode (#8246)
+- Fix handling of dark_mode_support:false setting in skins meta.json - also when devel_mode=false (#8249)
+- Fix database initialization if db_prefix is a schema prefix (#8221)
+- Fix undefined constant error in Installer on Windows (#8258)
+- Fix installation/upgrade on MySQL 5.5 - Index column size too large (#8231)
+- Fix regression in setting of contact listing name (#8260)
+- Fix bug in Larry skin where headers toggle state was reset on full page preview (#8203)
+- Fix bug where \u200b characters were added into the recipient input preventing mail delivery (#8269)
+- Fix charset conversion errors on PHP < 8 for charsets not supported by mbstring (#8252)
+- Fix bug where adding a contact to trusted senders via "Always allow from..." button didn't work (#8264, #8268)
+- Fix bug with show_images setting where option 1 and 3 were swapped (#8268)
+- Fix PHP fatal error on an undefined constant in contacts import action (#8277)
+- Fix fetching headers of multiple message parts at once in rcube_imap_generic::fetchMIMEHeaders() (#8282)
+- Fix bug where attachment download could sometimes fail with a CSRF check error (#8283)
+- Fix an infinite loop when parsing environment variables with float/integer values (#8293)
+- Fix so 'small-dark' logo has more priority than the 'small' logo (#8298)
+
+## Release 1.5.0
+
+- Support displaying RTF content (including encapsulated HTML) from a TNEF attachment
+- Newmail_notifier: Improved the notification sound (#8155)
+- Disable the default spellchecker option using spell.roundcube.net (#8182)
 - Fix size of Mailvelope iframe for PGP-inlined mail, again (#8126)
 - Fix handling of group names with @ character in autocomplete and contacts widget (#8098)
 - Fix Firefox infinate loading display on mail screen (#8128)
@@ -44,6 +89,7 @@
 - Fix XSS issue in handling attachment filename extension in mimetype mismatch warning (#8193)
 - Fix SQL injection via some session variables
 - Fix handling of dark_mode_support:false setting in skins meta.json (#8186)
+- Fix security issues regarding server name and trusted_host_patterns setting
 
 ## Release 1.5-rc
 

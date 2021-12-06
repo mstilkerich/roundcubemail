@@ -246,7 +246,7 @@ class rcube_imap_generic
 
             while (strlen($out) < $bytes) {
                 $out = $this->readBytes($bytes);
-                if ($out === null) {
+                if ($out === '') {
                     break;
                 }
 
@@ -278,7 +278,7 @@ class rcube_imap_generic
 
             while (strlen($out) < $bytes) {
                 $line = $this->readBytes($bytes);
-                if ($line === null) {
+                if ($line === '') {
                     break;
                 }
 
@@ -2810,10 +2810,9 @@ class rcube_imap_generic
 
         do {
             $line = $this->readLine(1024);
-
             if (preg_match('/^\* [0-9]+ FETCH [0-9UID( ]+/', $line, $m)) {
                 $line = ltrim(substr($line, strlen($m[0])));
-                while (preg_match('/^BODY\[([0-9\.]+)\.'.$type.'\]/', $line, $matches)) {
+                while (preg_match('/^\s*BODY\[([0-9\.]+)\.'.$type.'\]/', $line, $matches)) {
                     $line = substr($line, strlen($matches[0]));
                     $result[$matches[1]] = trim($this->multLine($line));
                     $line = $this->readLine(1024);
@@ -2942,15 +2941,16 @@ class rcube_imap_generic
                 $bytes = (int) $m[1];
                 $prev  = '';
                 $found = true;
+                $chunkSize = 1024 * 1024;
 
                 // empty body
                 if (!$bytes) {
                     $result = '';
                 }
                 else while ($bytes > 0) {
-                    $line = $this->readLine(8192);
+                    $line = $this->readBytes($bytes > $chunkSize ? $chunkSize : $bytes);
 
-                    if ($line === null) {
+                    if ($line === '') {
                         break;
                     }
 

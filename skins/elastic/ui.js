@@ -809,7 +809,7 @@ function rcube_elastic_ui()
         $('#taskmenu a.theme').on('click', function() {
             color_mode = $(this).is('.dark') ? 'dark' : 'light';
             switch_color_mode();
-            rcmail.set_cookie('colorMode', color_mode);
+            rcmail.set_cookie('colorMode', color_mode, false);
         });
 
         // Note: this does not work in IE and Safari
@@ -1730,11 +1730,11 @@ function rcube_elastic_ui()
                 $('#logo').data('src-default', $('#logo').attr('src'));
             }
 
-            if (mode == 'phone' && logos['small']) {
-                $('#logo').attr('src', logos['small']);
-            }
-            else if (mode == 'phone' && color_mode == 'dark' && logos['small-dark']) {
+            if (mode == 'phone' && color_mode == 'dark' && logos['small-dark']) {
                 $('#logo').attr('src', logos['small-dark']);
+            }
+            else if (mode == 'phone' && logos['small']) {
+                $('#logo').attr('src', logos['small']);
             }
             else if (color_mode == 'dark' && logos['dark']) {
                 $('#logo').attr('src', logos['dark']);
@@ -2827,6 +2827,11 @@ function rcube_elastic_ui()
                     rcmail.env.search_interval = interval_select.val();
                 });
             }
+
+            $(obj).find('.proplist > li > a.dropdown').on('click', function() {
+                var list = $(this).next()
+                list[list.is('.d-none') ? 'removeClass' : 'addClass']('d-none');
+            });
         }
 
         scope_select.val(scope);
@@ -2850,11 +2855,18 @@ function rcube_elastic_ui()
                 }
             }
         }
+
+        set_searchmod_masters(obj);
     };
 
+    /**
+     * Handler for a search option state update
+     */
     function set_searchmod(menu, elem)
     {
-        var all, m, task = rcmail.env.task,
+        var all, m, masters = {},
+            list = $('input[name="s_mods[]"]', menu),
+            task = rcmail.env.task,
             mods = rcmail.env.search_mods || {},
             mbox = rcmail.env.mailbox;
 
@@ -2864,6 +2876,10 @@ function rcube_elastic_ui()
             }
             m = mods[mbox];
             all = 'text';
+            masters = {
+                sender: ['from', 'replyto', 'followupto'],
+                recipient: ['to', 'cc', 'bcc']
+            };
         }
         else {
             // addressbook
@@ -2880,7 +2896,7 @@ function rcube_elastic_ui()
 
         // mark all fields
         if (elem.value == all) {
-            $('input[name="s_mods[]"]', menu).not(elem).map(function() {
+            list.not(elem).each(function() {
                 this.checked = true;
 
                 if (elem.checked) {
@@ -2889,13 +2905,43 @@ function rcube_elastic_ui()
                 }
                 else {
                     this.disabled = false;
-                    m[this.value] = 1;
+                    if (!(this.value in masters)) {
+                        m[this.value] = 1;
+                    }
                 }
             });
+        }
+        // Handle clicks on Sender/Recipient elements
+        else if (elem.value in masters) {
+            delete m[elem.value];
+
+            list.filter(function() { return $.inArray(this.value, masters[elem.value]) != -1; }).each(function() {
+                if (elem.checked) {
+                    this.checked = true;
+                    m[this.value] = 1;
+                }
+                else {
+                    this.checked = false;
+                    delete m[this.value];
+                }
+            });
+        }
+        else if (masters.sender) {
+            set_searchmod_masters(menu);
         }
 
         rcmail.set_searchmods(m);
     };
+
+    /*
+     * Set state of the Sender/Recipient checkbox depending on whether any of the sub-items are checked
+     */
+    function set_searchmod_masters(obj)
+    {
+        $(obj).find('.proplist > li.with-sublist').each(function() {
+            $(this).find(':not(.proplist) input')[0].checked = $(this).children('.proplist').find('input:checked').length > 0;
+        });
+    }
 
     /**
      * Spellcheck languages list
@@ -4140,6 +4186,15 @@ function rcube_elastic_ui()
      */
     function window_open(url, small, toolbar, force_window)
     {
+        var colorFunc = function (body) {
+            $(body).css({
+                color: $(document.body).css('color'),
+                backgroundColor: $(document.body).css('background-color')
+            })
+        };
+
+        var setColor = color_mode == 'dark' && /_task=mail/.test(url) && /_action=viewsource/.test(url);
+
         // Use 4th argument to bypass the dialog-mode e.g. for external windows
         if (!is_mobile() || force_window === true) {
             // On attachment preview page we do not display the properties sidebar
@@ -4148,7 +4203,14 @@ function rcube_elastic_ui()
                 small = true;
             }
 
-            return env.open_window.call(rcmail, url, small, toolbar);
+            var win = env.open_window.call(rcmail, url, small, toolbar);
+
+            // Switch the plain/text window to dark-mode
+            if (setColor) {
+                $(win).on('load', function() { colorFunc(win.document.body); });
+            }
+
+            return win;
         }
 
         // _extwin=1, _framed=1 are required to display attachment preview
@@ -4166,6 +4228,11 @@ function rcube_elastic_ui()
 
         if (/_frame=1/.test(url)) {
             props.dialogClass = 'no-titlebar';
+        }
+
+        // Switch the plain/text iframe to dark-mode
+        if (setColor) {
+            frame.on('load', function() { colorFunc(frame[0].contentWindow.document.body); });
         }
 
         rcmail.simple_dialog(frame, title, null, props);
@@ -4245,9 +4312,7 @@ function rcube_elastic_ui()
         // write prefs to local storage (if supported)
         if (!rcmail.local_storage_set_item('prefs.elastic', prefs)) {
             // store value in cookie
-            var exp = new Date();
-            exp.setYear(exp.getFullYear() + 1);
-            rcmail.set_cookie(key, val, exp);
+            rcmail.set_cookie(key, val, false);
         }
     };
 }

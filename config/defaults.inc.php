@@ -1217,7 +1217,7 @@ $config['contactlist_fields'] = ['name', 'firstname', 'surname', 'email'];
 
 // Template of contact entry on the autocompletion list.
 // You can use contact fields as: name, email, organization, department, etc.
-// See program/steps/addressbook/func.inc for a list
+// See program/actions/contacts/index.php for a list
 $config['contact_search_name'] = '{name} <{email}>';
 
 // Contact mode. If your contacts are mostly business, switch it to 'business'.
@@ -1278,11 +1278,11 @@ $config['timezone'] = 'auto';
 // prefer displaying HTML messages
 $config['prefer_html'] = true;
 
-// Display remote resources (inline images, styles) in HTML messages
+// Display remote resources (inline images, styles) in HTML messages. Default: 0.
 // 0 - Never, always ask
 // 1 - Allow from my contacts (all writeable addressbooks + collected senders and recipients)
 // 2 - Always allow
-// 3 - Allow from trusted senders
+// 3 - Allow from trusted senders only
 $config['show_images'] = 0;
 
 // open messages in new window
@@ -1397,7 +1397,7 @@ $config['force_7bit'] = false;
 // Default fields configuration for mail search.
 // The array can contain a per-folder list of header fields which should be considered when searching
 // The entry with key '*' stands for all folders which do not have a specific list set.
-// Supported fields: subject, from, to, cc, bcc, body, text.
+// Supported fields: subject, from, to, cc, bcc, replyto, followupto, body, text.
 // Please note that folder names should to be in sync with $config['*_mbox'] options
 $config['search_mods'] = null;  // Example: ['*' => ['subject'=>1, 'from'=>1], 'Sent' => ['subject'=>1, 'to'=>1]];
 

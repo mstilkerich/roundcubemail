@@ -188,7 +188,7 @@ EOF;
     {
         // set absolute path for assets if /index.php/foo/bar url is used
         if (empty($path) && !empty($_SERVER['PATH_INFO'])) {
-            $path = preg_replace('/\/?\?_task=[a-z]+/', '', $this->app->url([], true));
+            $path = preg_replace('/\?_task=[a-z]+/', '', $this->app->url([], true));
         }
 
         if (empty($path)) {
@@ -1878,7 +1878,7 @@ EOF;
             $link_attrib = ['href', 'onclick', 'onmouseover', 'onmouseout', 'onmousedown', 'onmouseup', 'target'];
         }
         else if ($attrib['type'] == 'link') {
-            $btn_content = $attrib['content'] ?? ($attrib['label'] ?: $attrib['command']);
+            $btn_content = $attrib['content'] ?? (!empty($attrib['label']) ? $attrib['label'] : $attrib['command']);
             $link_attrib = array_merge(html::$common_attrib, ['href', 'onclick', 'tabindex', 'target', 'rel']);
             if (!empty($attrib['innerclass'])) {
                 $btn_content = html::span($attrib['innerclass'], $btn_content);
@@ -2340,7 +2340,26 @@ EOF;
         $input_pass   = new html_passwordfield(['name' => '_pass', 'id' => 'rcmloginpwd', 'required' => 'required']
             + $attrib + $pass_attrib);
         $input_host   = null;
-        $hide_host    = false;
+
+        $form_content = [
+            'hidden' => [
+                'task'   => $input_task->show(),
+                'action' => $input_action->show(),
+                'tzone'  => $input_tzone->show(),
+                'url'    => $input_url->show(),
+            ],
+            'inputs' => [
+                'user' => [
+                    'title'   => html::label('rcmloginuser', html::quote($this->app->gettext('username'))),
+                    'content' => $input_user->show(rcube_utils::get_input_string('_user', rcube_utils::INPUT_GPC))
+                ],
+                'password' => [
+                    'title'   => html::label('rcmloginpwd', html::quote($this->app->gettext('password'))),
+                    'content' => $input_pass->show()
+                ],
+            ],
+            'buttons' => []
+        ];
 
         if (is_array($default_host) && count($default_host) > 1) {
             $input_host = new html_select(['name' => '_host', 'id' => 'rcmloginhost', 'class' => 'custom-select']);
@@ -2356,56 +2375,79 @@ EOF;
             }
         }
         else if (is_array($default_host) && ($host = key($default_host)) !== null) {
-            $hide_host = true;
-            $input_host = new html_hiddenfield([
-                'name' => '_host', 'id' => 'rcmloginhost', 'value' => is_numeric($host) ? $default_host[$host] : $host] + $attrib);
+            $val = is_numeric($host) ? $default_host[$host] : $host;
+            $input_host = new html_hiddenfield(['name' => '_host', 'id' => 'rcmloginhost', 'value' => $val] + $attrib);
+
+            $form_content['hidden']['host'] = $input_host->show();
+            $input_host = null;
         }
         else if (empty($default_host)) {
             $input_host = new html_inputfield(['name' => '_host', 'id' => 'rcmloginhost', 'class' => 'form-control']
                 + $attrib + $host_attrib);
         }
 
-        $this->add_gui_object('loginform', $form_name);
-
-        // create HTML table with two cols
-        $table = new html_table(['cols' => 2]);
-
-        $table->add('title', html::label('rcmloginuser', html::quote($this->app->gettext('username'))));
-        $table->add('input', $input_user->show(rcube_utils::get_input_string('_user', rcube_utils::INPUT_GPC)));
-
-        $table->add('title', html::label('rcmloginpwd', html::quote($this->app->gettext('password'))));
-        $table->add('input', $input_pass->show());
-
         // add host selection row
-        if (is_object($input_host) && !$hide_host) {
-            $table->add('title', html::label('rcmloginhost', html::quote($this->app->gettext('server'))));
-            $table->add('input', $input_host->show(rcube_utils::get_input_string('_host', rcube_utils::INPUT_GPC)));
-        }
-
-        $out  = $input_task->show();
-        $out .= $input_action->show();
-        $out .= $input_tzone->show();
-        $out .= $input_url->show();
-        $out .= $table->show();
-
-        if ($hide_host) {
-            $out .= $input_host->show();
+        if (is_object($input_host)) {
+            $form_content['inputs']['host'] = [
+                'title'   => html::label('rcmloginhost', html::quote($this->app->gettext('server'))),
+                'content' => $input_host->show(rcube_utils::get_input_string('_host', rcube_utils::INPUT_GPC))
+            ];
         }
 
         if (rcube_utils::get_boolean($attrib['submit'])) {
             $button_attr = ['type' => 'submit', 'id' => 'rcmloginsubmit', 'class' => 'button mainaction submit'];
-            $out .= html::p('formbuttons', html::tag('button', $button_attr, $this->app->gettext('login')));
+            $button      = html::tag('button', $button_attr, $this->app->gettext('login'));
+
+            $form_content['buttons']['submit'] = ['outterclass' => 'formbuttons', 'content' => $button];
         }
 
         // add oauth login button
         if ($this->config->get('oauth_auth_uri') && $this->config->get('oauth_provider')) {
             // hide login form fields when `oauth_login_redirect` is configured
             if ($this->config->get('oauth_login_redirect')) {
-                $out = '';
+                $form_content['hidden']  = [];
+                $form_content['inputs']  = [];
+                $form_content['buttons'] = [];
             }
 
-            $link_attr = ['href' => $this->app->url(['action' => 'oauth']), 'id' => 'rcmloginoauth', 'class' => 'button oauth ' . $this->config->get('oauth_provider')];
-            $out .= html::p('oauthlogin', html::a($link_attr, $this->app->gettext(['name' => 'oauthlogin', 'vars' => ['provider' => $this->config->get('oauth_provider_name', 'OAuth')]])));
+            $link_attr = [
+                'href'  => $this->app->url(['action' => 'oauth']),
+                'id'    => 'rcmloginoauth',
+                'class' => 'button oauth ' . $this->config->get('oauth_provider')
+            ];
+
+            $provider = $this->config->get('oauth_provider_name', 'OAuth');
+            $button   = html::a($link_attr, $this->app->gettext(['name' => 'oauthlogin', 'vars' => ['provider' => $provider]]));
+
+            $form_content['buttons']['oauthlogin'] = ['outterclass' => 'oauthlogin', 'content' => $button];
+        }
+
+        $data = $this->app->plugins->exec_hook('loginform_content', $form_content);
+
+        $this->add_gui_object('loginform', $form_name);
+
+        // output login form contents
+        $out = implode('', $data['hidden']);
+
+        if (count($data['inputs']) > 0) {
+            // create HTML table with two cols
+            $table = new html_table(['cols' => 2]);
+
+            foreach ($data['inputs'] as $input) {
+                if (isset($input['title'])) {
+                    $table->add('title', $input['title']);
+                    $table->add('input', $input['content']);
+                }
+                else {
+                    $table->add(['colspan' => 2, 'class' => 'input'], $input['content']);
+                }
+            }
+
+            $out .= $table->show();
+        }
+
+        foreach ($data['buttons'] as $button) {
+            $out .= html::p($button['outterclass'], $button['content']);
         }
 
         // surround html output with a form tag
@@ -2432,7 +2474,7 @@ EOF;
         $images = array_map([$this, 'abs_url'], $images);
         $images = array_map([$this, 'asset_url'], $images);
 
-        if (empty($images) || $_REQUEST['_task'] == 'logout') {
+        if (empty($images) || (isset($_REQUEST['_task']) && $_REQUEST['_task'] == 'logout')) {
             return;
         }
 
