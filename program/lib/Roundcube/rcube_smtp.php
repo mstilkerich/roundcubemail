@@ -105,7 +105,7 @@ class rcube_smtp
             $smtp_host = sprintf('%s://%s', $smtp_host_url['scheme'], $smtp_host_url['host']);
         }
 
-        // remove TLS prefix and set flag for use in Net_SMTP::auth()
+        // remove TLS prefix and set flag to enable TLS later
         $use_tls = false;
         if (preg_match('#^tls://#i', $smtp_host)) {
             $smtp_host = preg_replace('#^tls://#i', '', $smtp_host);
@@ -140,7 +140,7 @@ class rcube_smtp
         if (!empty($CONFIG['smtp_auth_callbacks']) && method_exists($this->conn, 'setAuthMethod')) {
             foreach ($CONFIG['smtp_auth_callbacks'] as $callback) {
                 $this->conn->setAuthMethod($callback['name'], $callback['function'],
-                    isset($callback['prepend']) ? $callback['prepend'] : true);
+                    $callback['prepend'] ?? true);
             }
         }
 
@@ -172,8 +172,22 @@ class rcube_smtp
             return false;
         }
 
-        $smtp_user = str_replace('%u', $rcube->get_user_name(), $CONFIG['smtp_user']);
-        $smtp_pass = str_replace('%p', $rcube->get_user_password(), $CONFIG['smtp_pass']);
+        if ($use_tls) {
+            $result = $this->conn->starttls();
+
+            if (is_a($result, 'PEAR_Error')) {
+                list($code,) = $this->conn->getResponse();
+                $this->error = ['label' => 'smtperror', 'vars' => ['msg' => $result->getMessage()
+                    . ' (' . $code . ')']];
+
+                $this->disconnect();
+
+                return false;
+            }
+        }
+
+        $smtp_user = str_replace('%u', (string) $rcube->get_user_name(), $CONFIG['smtp_user']);
+        $smtp_pass = str_replace('%p', (string) $rcube->get_user_password(), $CONFIG['smtp_pass']);
         $smtp_auth_type = $CONFIG['smtp_auth_type'] ?: null;
         $smtp_authz     = null;
 
@@ -190,7 +204,7 @@ class rcube_smtp
                 $smtp_user = rcube_utils::idn_to_ascii($smtp_user);
             }
 
-            $result = $this->conn->auth($smtp_user, $smtp_pass, $smtp_auth_type, $use_tls, $smtp_authz);
+            $result = $this->conn->auth($smtp_user, $smtp_pass, $smtp_auth_type, false, $smtp_authz);
 
             if (is_a($result, 'PEAR_Error')) {
                 list($code,) = $this->conn->getResponse();

@@ -148,7 +148,7 @@ class rcmail_oauth
         if (isset($body['azp']) && $body['azp'] !== $this->options['client_id']) {
             throw new RuntimeException('Failed to validate JWT: invalid azp value');
         }
-        else if (isset($body['aud']) && $body['aud'] !== $this->options['client_id']) {
+        else if (isset($body['aud']) && !in_array($this->options['client_id'], (array) $body['aud'])) {
             throw new RuntimeException('Failed to validate JWT: invalid aud value');
         }
         else if (!isset($body['azp']) && !isset($body['aud'])) {
@@ -247,7 +247,6 @@ class rcmail_oauth
                             foreach ($this->options['identity_fields'] as $field) {
                                 if (isset($identity[$field])) {
                                     $username = $identity[$field];
-                                    unset($data['id_token']);
                                     break;
                                 }
                             }
@@ -290,6 +289,9 @@ class rcmail_oauth
                         'username' => $username,
                         'identity' => $identity,
                     ]));
+
+                    // remove some data we don't want to store in session
+                    unset($data['id_token']);
 
                     // return auth data
                     return [
@@ -429,7 +431,7 @@ class rcmail_oauth
     protected function mask_auth_data(&$data)
     {
         // compute absolute token expiration date
-        $data['expires'] = time() + $data['expires_in'] - 600;
+        $data['expires'] = time() + $data['expires_in'] - 10;
 
         // encrypt refresh token if provided
         if (isset($data['refresh_token'])) {

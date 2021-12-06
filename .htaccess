@@ -10,7 +10,7 @@ RewriteRule ^favicon\.ico$ skins/larry/images/favicon.ico
 #   in all locations except installer directory
 RewriteRule ^(?!installer|\.well-known\/|[a-zA-Z0-9]{16})(\.?[^\.]+)$ - [F]
 # - deny access to some locations
-RewriteRule ^/?(\.git|\.tx|\.ci|SQL|bin|config|logs|temp|tests|vendor|program\/(include|lib|localization|steps)) - [F]
+RewriteRule ^/?(\.git|\.tx|SQL|bin|config|logs|temp|tests|vendor|program\/(include|lib|localization|steps)) - [F]
 # - deny access to some documentation files
 RewriteRule /?(README.*|CHANGELOG.*|SECURITY.*|meta\.json|composer\..*|jsdeps.json)$ - [F]
 </IfModule>
@@ -66,6 +66,6 @@ Header set X-Robots-Tag "noindex, nofollow"
 
 # X-Content-Type-Options
 # It prevents Google Chrome and Internet Explorer from trying to mime-sniff the content-type of a response away from the one being declared by the server.
-#Header set X-Content-Type-Options: "nosniff"
+#Header set X-Content-Type-Options "nosniff"
 
 </IfModule>

@@ -159,9 +159,7 @@ this.setCurrentLanguage = function(lan_code)
     GOOGIE_CUR_LANG = lan_code;
 
     //Set cookie
-    var now = new Date();
-    now.setTime(now.getTime() + 365 * 24 * 60 * 60 * 1000);
-    rcmail.set_cookie('language', lan_code, now);
+    rcmail.set_cookie('language', lan_code, false);
 };
 
 this.setForceWidthHeight = function(width, height)
@@ -653,7 +651,7 @@ this.createEditLayer = function(width, height)
                     $(ref.text_area).focus();
                     fn1 = null;
                 };
-                window.setTimeout(fn1, 10);
+                setTimeout(fn1, 10);
             }
             return false;
         });
@@ -833,7 +831,7 @@ this.flashNoSpellingErrorState = function(on_finish)
         $(this.spell_span).empty().append(rsm)
         .removeClass().addClass('googie_check_spelling_ok');
 
-        window.setTimeout(no_spell_errors, 1000);
+        setTimeout(no_spell_errors, 1000);
     }
 };
 

@@ -76,7 +76,7 @@ class database_attachments extends filesystem_attachments
         $cache = $this->get_cache();
         $key   = $this->_key($args);
 
-        if ($args['path']) {
+        if (!empty($args['path'])) {
             $args['data'] = file_get_contents($args['path']);
 
             if ($args['data'] === false) {
@@ -148,7 +148,7 @@ class database_attachments extends filesystem_attachments
     {
         // check if cache object exist, it may be empty on session_destroy (#1489726)
         if ($cache = $this->get_cache()) {
-            $cache->remove(isset($args['group']) ? $args['group'] : null, true);
+            $cache->remove($args['group'] ?? null, true);
         }
     }
 

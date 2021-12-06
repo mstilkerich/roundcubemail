@@ -10,13 +10,16 @@ class ActionTestCase extends PHPUnit\Framework\TestCase
     static $files = [];
 
 
-    static function setUpBeforeClass()
+    static function setUpBeforeClass(): void
     {
+        // reset some interfering globals set in other tests
+        $_SERVER['REQUEST_URI'] = '';
+
         $rcmail = rcmail::get_instance();
         $rcmail->load_gui();
     }
 
-    static function tearDownAfterClass()
+    static function tearDownAfterClass(): void
     {
         foreach (self::$files as $file) {
             unlink($file);
@@ -28,7 +31,7 @@ class ActionTestCase extends PHPUnit\Framework\TestCase
         $rcmail->shutdown();
     }
 
-    public function setUp()
+    public function setUp(): void
     {
         $_GET     = [];
         $_POST    = [];

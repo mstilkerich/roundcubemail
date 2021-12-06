@@ -381,7 +381,6 @@ $config['oauth_login_redirect'] = false;
 // $config['oauth_identity_uri'] = 'https://www.googleapis.com/oauth2/v1/userinfo';
 // $config['oauth_scope'] = "email profile openid https://mail.google.com/";
 // $config['oauth_auth_parameters'] = ['access_type' => 'offline', 'prompt' => 'consent'];
-// $config['login_password_maxlen'] = 2048;  // access tokens can get very long
 
 ///// Example config for Outlook.com (Office 365)
 
@@ -391,7 +390,6 @@ $config['oauth_login_redirect'] = false;
 
 // $config['default_host'] = 'ssl://outlook.office365.com';
 // $config['smtp_server'] = 'ssl://smtp.office365.com';
-// $config['login_password_maxlen'] = 2048;  // access tokens can get very long
 
 // $config['oauth_provider'] = 'outlook';
 // $config['oauth_provider_name'] = 'Outlook.com';
@@ -745,9 +743,13 @@ $config['mdn_use_from'] = false;
 // 4 - one identity with possibility to edit only signature
 $config['identities_level'] = 0;
 
-// Maximum size of uploaded image in kilobytes
-// Images (in html signatures) are stored in database as data URIs
+// Maximum size of uploaded image (in kilobytes) for HTML identities.
+// Images (in html signatures) are stored in database as data URIs.
 $config['identity_image_size'] = 64;
+
+// Maximum size of uploaded image (in kilobytes) for HTML responses.
+// Images (in html responses) are stored in database as data URIs.
+$config['response_image_size'] = 64;
 
 // Mimetypes supported by the browser.
 // Attachments of these types will open in a preview window.
@@ -857,14 +859,14 @@ $config['list_cols'] = ['subject', 'status', 'fromto', 'date', 'size', 'flag', '
 // RFC1766 formatted language name like en_US, de_DE, de_CH, fr_FR, pt_BR
 $config['language'] = null;
 
-// use this format for date display (date or strftime format)
+// use this format for date display (PHP DateTime format)
 $config['date_format'] = 'Y-m-d';
 
 // give this choice of date formats to the user to select from
 // Note: do not use ambiguous formats like m/d/Y
 $config['date_formats'] = ['Y-m-d', 'Y/m/d', 'Y.m.d', 'd-m-Y', 'd/m/Y', 'd.m.Y', 'j.n.Y'];
 
-// use this format for time display (date or strftime format)
+// use this format for time display (PHP DateTime format)
 $config['time_format'] = 'H:i';
 
 // give this choice of time formats to the user to select from
@@ -907,8 +909,8 @@ $config['show_real_foldernames'] = false;
 // if in your system 0 quota means no limit set this option to true
 $config['quota_zero_as_unlimited'] = false;
 
-// Make use of the built-in spell checker. It is based on GoogieSpell.
-$config['enable_spellcheck'] = true;
+// Make use of the built-in spell checker.
+$config['enable_spellcheck'] = false;
 
 // Enables spellchecker exceptions dictionary.
 // Setting it to 'shared' will make the dictionary shared by all users.
@@ -977,6 +979,15 @@ $config['mailvelope_main_keyring'] = false;
 // Mailvelope RSA bit size for newly generated keys, either 2048 or 4096.
 // It maybe desirable to use 2048 for sites with many mobile users.
 $config['mailvelope_keysize'] = 4096;
+
+// Html2Text link handling options:
+// 0 - links will be removed
+// 1 - a list of link URLs should be listed at the end of the text (default)
+// 2 - link should be displayed to the original point in the text they appeared
+$config['html2text_links'] = 1;
+
+// Html2Text text width. Maximum width of the formatted text, in columns. Default: 75.
+$config['html2text_width'] = 75;
 
 // ----------------------------------
 // ADDRESSBOOK SETTINGS
@@ -1206,7 +1217,7 @@ $config['contactlist_fields'] = ['name', 'firstname', 'surname', 'email'];
 
 // Template of contact entry on the autocompletion list.
 // You can use contact fields as: name, email, organization, department, etc.
-// See program/steps/addressbook/func.inc for a list
+// See program/actions/contacts/index.php for a list
 $config['contact_search_name'] = '{name} <{email}>';
 
 // Contact mode. If your contacts are mostly business, switch it to 'business'.
@@ -1267,11 +1278,11 @@ $config['timezone'] = 'auto';
 // prefer displaying HTML messages
 $config['prefer_html'] = true;
 
-// Display remote resources (inline images, styles) in HTML messages
+// Display remote resources (inline images, styles) in HTML messages. Default: 0.
 // 0 - Never, always ask
 // 1 - Allow from my contacts (all writeable addressbooks + collected senders and recipients)
 // 2 - Always allow
-// 3 - Allow from trusted senders
+// 3 - Allow from trusted senders only
 $config['show_images'] = 0;
 
 // open messages in new window
@@ -1308,7 +1319,8 @@ $config['layout'] = 'widescreen';
 // Set to -1 if messages should not be marked as read
 $config['mail_read_time'] = 0;
 
-// Clear Trash on logout
+// Clear Trash on logout. Remove all messages or only older than N days.
+// Supported values: false, true, 30, 60, 90. Default: false.
 $config['logout_purge'] = false;
 
 // Compact INBOX on logout
@@ -1385,7 +1397,7 @@ $config['force_7bit'] = false;
 // Default fields configuration for mail search.
 // The array can contain a per-folder list of header fields which should be considered when searching
 // The entry with key '*' stands for all folders which do not have a specific list set.
-// Supported fields: subject, from, to, cc, bcc, body, text.
+// Supported fields: subject, from, to, cc, bcc, replyto, followupto, body, text.
 // Please note that folder names should to be in sync with $config['*_mbox'] options
 $config['search_mods'] = null;  // Example: ['*' => ['subject'=>1, 'from'=>1], 'Sent' => ['subject'=>1, 'to'=>1]];
 

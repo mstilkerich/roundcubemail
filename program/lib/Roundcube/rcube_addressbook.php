@@ -579,7 +579,9 @@ abstract class rcube_addressbook
      *
      * @param mixed $id Record identifier
      *
-     * @return array List of assigned groups as ID => Name pairs
+     * @return array List of assigned groups indexed by a group ID.
+     *               Every array element can be just a group name (string), or an array
+     *               with 'ID' and 'name' elements.
      * @since 0.5-beta
      */
     function get_record_groups($id)
@@ -638,7 +640,7 @@ abstract class rcube_addressbook
     public static function compose_display_name($contact, $full_email = false)
     {
         $contact = rcube::get_instance()->plugins->exec_hook('contact_displayname', $contact);
-        $fn      = isset($contact['name']) ? $contact['name'] : '';
+        $fn      = $contact['name'] ?? '';
 
         // default display name composition according to vcard standard
         if (!$fn) {
@@ -649,7 +651,7 @@ abstract class rcube_addressbook
 
         // use email address part for name
         $email = self::get_col_values('email', $contact, true);
-        $email = isset($email[0]) ? $email[0] : null;
+        $email = $email[0] ?? null;
 
         if ($email && (empty($fn) || $fn == $email)) {
             // return full email
@@ -683,20 +685,34 @@ abstract class rcube_addressbook
         static $compose_mode;
 
         if (!isset($compose_mode)) {
-            $compose_mode = rcube::get_instance()->config->get('addressbook_name_listing', 0);
+            $compose_mode = (int) rcube::get_instance()->config->get('addressbook_name_listing', 0);
         }
+
+        $get_names = function ($contact, $fields) {
+            $result = [];
+            foreach ($fields as $field) {
+                if (!empty($contact[$field])) {
+                    $result[] = $contact[$field];
+                }
+            }
+            return $result;
+        };
 
         switch ($compose_mode) {
         case 3:
-            $fn = implode(' ', [$contact['surname'] . ',', $contact['firstname'], $contact['middlename']]);
+            $names = $get_names($contact, ['firstname', 'middlename']);
+            if (!empty($contact['surname'])) {
+                array_unshift($names, $contact['surname'] . ',');
+            }
+            $fn = implode(' ', $names);
             break;
         case 2:
             $keys = ['surname', 'firstname', 'middlename'];
-            $fn   = implode(' ', array_filter(array_intersect_key($contact, array_flip($keys))));
+            $fn   = implode(' ', $get_names($contact, $keys));
             break;
         case 1:
             $keys = ['firstname', 'middlename', 'surname'];
-            $fn   = implode(' ', array_filter(array_intersect_key($contact, array_flip($keys))));
+            $fn   = implode(' ', $get_names($contact, $keys));
             break;
         case 0:
             if (!empty($contact['name'])) {
@@ -704,7 +720,7 @@ abstract class rcube_addressbook
             }
             else {
                 $keys = ['prefix', 'firstname', 'middlename', 'surname', 'suffix'];
-                $fn   = implode(' ', array_filter(array_intersect_key($contact, array_flip($keys))));
+                $fn   = implode(' ', $get_names($contact, $keys));
             }
             break;
         default:
@@ -718,7 +734,7 @@ abstract class rcube_addressbook
         // fallbacks...
         if ($fn === '') {
             // ... display name
-            if ($name = trim($contact['name'])) {
+            if (isset($contact['name']) && ($name = trim($contact['name']))) {
                 $fn = $name;
             }
             // ... organization

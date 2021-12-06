@@ -2,8 +2,7 @@
 
 class Archive_Plugin extends PHPUnit\Framework\TestCase
 {
-
-    function setUp()
+    static function setUpBeforeClass(): void
     {
         include_once __DIR__ . '/../archive.php';
     }
@@ -60,7 +59,7 @@ class Archive_Plugin extends PHPUnit\Framework\TestCase
 
         $result = $plugin->prefs_save($args);
 
-        $this->assertSame(null, $result['prefs']['archive_type']);
+        $this->assertSame('', $result['prefs']['archive_type']);
 
         $_POST = ['_archive_type' => 'aaa'];
         $args  = ['section' => 'folders', 'prefs' => []];

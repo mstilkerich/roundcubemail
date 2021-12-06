@@ -488,7 +488,7 @@ class rcube_ldap extends rcube_addressbook
 
         }  // end foreach hosts
 
-        if (!is_resource($this->ldap->conn)) {
+        if (empty($this->ldap->conn)) {
             rcube::raise_error([
                     'code' => 100, 'type' => 'ldap',
                     'file' => __FILE__, 'line' => __LINE__,
@@ -1459,7 +1459,7 @@ class rcube_ldap extends rcube_addressbook
             }
         }
 
-        return isset($newdn) ? $newdn : true;
+        return $newdn ?? true;
     }
 
     /**
@@ -1762,7 +1762,7 @@ class rcube_ldap extends rcube_addressbook
         $suffix = $limit ? ':'.$limit : '';
         $name   = strtolower($name);
 
-        return (isset($aliases[$name]) ? $aliases[$name] : $name) . $suffix;
+        return ($aliases[$name] ?? $name) . $suffix;
     }
 
     /**

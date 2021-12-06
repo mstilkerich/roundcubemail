@@ -36,7 +36,7 @@ class rcmail_action_mail_compose extends rcmail_action_mail_index
     {
         $rcmail = rcmail::get_instance();
 
-        self::$COMPOSE_ID = rcube_utils::get_input_value('_id', rcube_utils::INPUT_GET);
+        self::$COMPOSE_ID = rcube_utils::get_input_string('_id', rcube_utils::INPUT_GET);
         self::$COMPOSE    = null;
 
         if (self::$COMPOSE_ID && $_SESSION['compose_data_' . self::$COMPOSE_ID]) {
@@ -555,8 +555,8 @@ class rcmail_action_mail_compose extends rcmail_action_mail_index
 
         // use posted message body
         if (!empty($_POST['_message'])) {
-            $body   = rcube_utils::get_input_value('_message', rcube_utils::INPUT_POST, true);
-            $isHtml = (bool) rcube_utils::get_input_value('_is_html', rcube_utils::INPUT_POST);
+            $body   = rcube_utils::get_input_string('_message', rcube_utils::INPUT_POST, true);
+            $isHtml = (bool) rcube_utils::get_input_string('_is_html', rcube_utils::INPUT_POST);
         }
         else if (!empty(self::$COMPOSE['param']['body'])) {
             $body   = self::$COMPOSE['param']['body'];
@@ -783,7 +783,7 @@ class rcmail_action_mail_compose extends rcmail_action_mail_index
         // If desired, set this textarea to be editable by TinyMCE
         $attrib['data-html-editor'] = true;
         if (self::$HTML_MODE) {
-            $attrib['class'] = trim($attrib['class'] . ' mce_editor');
+            $attrib['class'] = trim(($attrib['class'] ?? '') . ' mce_editor');
         }
 
         $attrib['name'] = '_message';
@@ -828,9 +828,10 @@ class rcmail_action_mail_compose extends rcmail_action_mail_index
         }
 
         if (!$bodyIsHtml) {
-            // soft-wrap and quote message text
-            $line_length = $rcmail->config->get('line_length', 72);
-            $body = self::wrap_and_quote($body, $line_length, $reply_indent);
+            // quote the message text
+            if ($reply_indent) {
+                $body = self::quote_text($body);
+            }
 
             if ($reply_mode > 0) { // top-posting
                 $prefix = "\n\n\n" . $prefix;
@@ -1350,7 +1351,7 @@ class rcmail_action_mail_compose extends rcmail_action_mail_index
         if (!empty($attrib['icon_pos']) && $attrib['icon_pos'] == 'left') {
             self::$COMPOSE['icon_pos'] = 'left';
         }
-        $icon_pos = isset(self::$COMPOSE['icon_pos']) ? self::$COMPOSE['icon_pos'] : null;
+        $icon_pos = self::$COMPOSE['icon_pos'] ?? null;
 
         if (!empty(self::$COMPOSE['attachments'])) {
             if (!empty($attrib['deleteicon'])) {
@@ -1563,29 +1564,33 @@ class rcmail_action_mail_compose extends rcmail_action_mail_index
 
     /**
      * Responses list object for templates
+     *
+     * @param array $attrib Object attributes
+     *
+     * @return string HTML content
      */
     public static function compose_responses_list($attrib)
     {
         $rcmail = rcmail::get_instance();
 
-        $attrib += ['id' => 'rcmresponseslist', 'tagname' => 'ul', 'cols' => 1];
+        $attrib += ['id' => 'rcmresponseslist', 'tagname' => 'ul', 'cols' => 1, 'itemclass' => ''];
 
-        $jsenv = [];
         $list = new html_table($attrib);
 
-        foreach ($rcmail->get_compose_responses(true) as $response) {
-            $key  = $response['key'];
+        foreach ($rcmail->get_compose_responses() as $response) {
             $item = html::a([
-                    'href'         => '#' . urlencode($response['name']),
+                    'href'         => '#response-' . urlencode($response['id']),
                     'class'        => rtrim('insertresponse ' . $attrib['itemclass']),
                     'unselectable' => 'on',
                     'tabindex'     => '0',
-                    'rel'          => $key,
+                    'onclick'      => sprintf(
+                        "return %s.command('insert-response', '%s', this, event)",
+                        rcmail_output::JS_OBJECT_NAME,
+                        rcube::JQ($response['id']),
+                    ),
                 ],
                 rcube::Q($response['name'])
             );
-
-            $jsenv[$key] = $response;
 
             $list->add([], $item);
         }
@@ -1603,8 +1608,6 @@ class rcmail_action_mail_compose extends rcmail_action_mail_index
             ));
         }
 
-        // set client env
-        $rcmail->output->set_env('textresponses', $jsenv);
         $rcmail->output->add_gui_object('responseslist', $attrib['id']);
 
         return $list->show();
@@ -1624,7 +1627,7 @@ class rcmail_action_mail_compose extends rcmail_action_mail_index
         }
         else if ($message instanceof rcube_message) {
             // the whole message requested
-            $size     = isset($message->size) ? $message->size : null;
+            $size     = $message->size ?? null;
             $mimetype = 'message/rfc822';
             $filename = !empty($params['filename']) ? $params['filename'] : 'message_rfc822.eml';
         }
@@ -1679,9 +1682,9 @@ class rcmail_action_mail_compose extends rcmail_action_mail_index
             'mimetype'   => $mimetype,
             'content_id' => !empty($part) && isset($part->content_id) ? $part->content_id : null,
             'data'       => $data,
-            'path'       => isset($path) ? $path : null,
+            'path'       => $path ?? null,
             'size'       => isset($path) ? filesize($path) : strlen($data),
-            'charset'    => !empty($part) ? $part->charset : (isset($params['charset']) ? $params['charset'] : null),
+            'charset'    => !empty($part) ? $part->charset : ($params['charset'] ?? null),
         ];
 
         $attachment = $rcmail->plugins->exec_hook('attachment_save', $attachment);
@@ -1710,5 +1713,25 @@ class rcmail_action_mail_compose extends rcmail_action_mail_index
         }
 
         return false;
+    }
+
+    /**
+     * Add quotation (>) to a replied message text.
+     *
+     * @param string $text Text to quote
+     *
+     * @return string The quoted text
+     */
+    public static function quote_text($text)
+    {
+        $lines = preg_split('/\r?\n/', trim($text));
+        $out   = '';
+
+        foreach ($lines as $line) {
+            $quoted = isset($line[0]) && $line[0] == '>';
+            $out .= '>' . ($quoted ? '' : ' ') . $line . "\n";
+        }
+
+        return rtrim($out, "\n");
     }
 }
