@@ -215,7 +215,7 @@ class rcube
      * @param string $ttl    Expiration time for cache items
      * @param bool   $packed Enables/disables data serialization
      *
-     * @return rcube_cache User cache object
+     * @return rcube_cache|null User cache object
      */
     public function get_cache($name, $type='db', $ttl=0, $packed=true)
     {
@@ -838,7 +838,7 @@ class rcube
      * @param string $key    Encryption key to retrieve from the configuration, defaults to 'des_key'
      * @param bool   $base64 Whether or not to base64_encode() the result before returning
      *
-     * @return string Encrypted text
+     * @return string|false Encrypted text, false on error
      */
     public function encrypt($clear, $key = 'des_key', $base64 = true)
     {
@@ -872,9 +872,9 @@ class rcube
      *
      * @param string $cipher Encrypted text
      * @param string $key    Encryption key to retrieve from the configuration, defaults to 'des_key'
-     * @param boo    $base64 Whether or not input is base64-encoded
+     * @param bool    $base64 Whether or not input is base64-encoded
      *
-     * @return string Decrypted text
+     * @return string|false Decrypted text, false on error
      */
     public function decrypt($cipher, $key = 'des_key', $base64 = true)
     {

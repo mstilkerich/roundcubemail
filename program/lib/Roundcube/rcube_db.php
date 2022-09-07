@@ -26,6 +26,7 @@
  */
 class rcube_db
 {
+    /** @var string Database implementation (mysql, postgres, etc.) */
     public $db_provider;
 
     protected $db_dsnw;               // DSN for write operations
@@ -284,7 +285,7 @@ class rcube_db
     /**
      * Activate/deactivate debug mode
      *
-     * @param boolean $dbg True if SQL queries should be logged
+     * @param bool $dbg True if SQL queries should be logged
      */
     public function set_debug($dbg = true)
     {
@@ -327,7 +328,7 @@ class rcube_db
     /**
      * Connection state checker
      *
-     * @return boolean True if in connected state
+     * @return bool True if in connected state
      */
     public function is_connected()
     {
@@ -364,7 +365,7 @@ class rcube_db
      * @param string SQL query to execute
      * @param mixed  Values to be inserted in query
      *
-     * @return number  Query handle identifier
+     * @return PDOStatement|false  Query handle or False on error
      */
     public function query()
     {
@@ -387,7 +388,7 @@ class rcube_db
      * @param int    Number of rows for LIMIT statement
      * @param mixed  Values to be inserted in query
      *
-     * @return PDOStatement|bool Query handle or False on error
+     * @return PDOStatement|false Query handle or False on error
      */
     public function limitquery()
     {
@@ -407,7 +408,7 @@ class rcube_db
      * @param int    $numrows Number of rows for LIMIT statement
      * @param array  $params  Values to be inserted in query
      *
-     * @return PDOStatement|bool Query handle or False on error
+     * @return PDOStatement|false Query handle or False on error
      */
     protected function _query($query, $offset, $numrows, $params)
     {
@@ -623,7 +624,7 @@ class rcube_db
      *
      * @param mixed $result Optional query handle
      *
-     * @return mixed Array with col values or false on failure
+     * @return array|false Array with col values or false on failure
      */
     public function fetch_assoc($result = null)
     {
@@ -636,7 +637,7 @@ class rcube_db
      *
      * @param mixed $result Optional query handle
      *
-     * @return mixed Array with col values or false on failure
+     * @return array|false Array with col values or false on failure
      */
     public function fetch_array($result = null)
     {
@@ -649,7 +650,7 @@ class rcube_db
      * @param mixed $result Optional query handle
      * @param int   $mode   Fetch mode identifier
      *
-     * @return mixed Array with col values or false on failure
+     * @return array|false Array with col values or false on failure
      */
     protected function _fetch_row($result, $mode)
     {
