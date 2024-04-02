@@ -1,32 +1,38 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Test class to test rcube_ldap_generic class
- *
- * @package Tests
  */
-class Framework_LdapGeneric extends PHPUnit\Framework\TestCase
+class Framework_LdapGeneric extends TestCase
 {
+    protected function markTestSkippedIfNetLdapPackageIsNotInstalled(): void
+    {
+        if (!class_exists(Net_LDAP3::class)) {
+            $this->markTestSkipped('The Net_LDAP3 package not available.');
+        }
+    }
+
     /**
      * Class constructor
      */
-    function test_class()
+    public function test_class()
     {
-        // skip test if Net_LDAP3 does not exist
-        if (!class_exists('Net_LDAP3')) {
-            $this->markTestSkipped('The Net_LDAP3 package not available.');
-        }
+        $this->markTestSkippedIfNetLdapPackageIsNotInstalled();
 
         $object = new rcube_ldap_generic([]);
 
-        $this->assertInstanceOf('rcube_ldap_generic', $object, "Class constructor");
+        $this->assertInstanceOf('rcube_ldap_generic', $object, 'Class constructor');
     }
 
     /**
      * Test fulltext_search_filter() method
      */
-    function test_fulltext_search_filter()
+    public function test_fulltext_search_filter()
     {
+        $this->markTestSkippedIfNetLdapPackageIsNotInstalled();
+
         $object = new rcube_ldap_generic([]);
 
         $result = $object->fulltext_search_filter('test', ['dn']);

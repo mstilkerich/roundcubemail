@@ -1,6 +1,8 @@
 <?php
 
-class Userinfo_Plugin extends PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+
+class Userinfo_Plugin extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
@@ -10,13 +12,12 @@ class Userinfo_Plugin extends PHPUnit\Framework\TestCase
     /**
      * Plugin object construction test
      */
-    function test_constructor()
+    public function test_constructor()
     {
-        $rcube  = rcube::get_instance();
+        $rcube = rcube::get_instance();
         $plugin = new userinfo($rcube->plugins);
 
         $this->assertInstanceOf('userinfo', $plugin);
         $this->assertInstanceOf('rcube_plugin', $plugin);
     }
 }
-

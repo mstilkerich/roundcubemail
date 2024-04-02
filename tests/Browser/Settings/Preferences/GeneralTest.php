@@ -3,8 +3,9 @@
 namespace Tests\Browser\Settings\Preferences;
 
 use Tests\Browser\Components\App;
+use Tests\Browser\TestCase;
 
-class GeneralTest extends \Tests\Browser\TestCase
+class GeneralTest extends TestCase
 {
     private $settings;
 
@@ -39,7 +40,7 @@ class GeneralTest extends \Tests\Browser\TestCase
                 }
 
                 // check task and action
-                $browser->with(new App(), function ($browser) {
+                $browser->with(new App(), static function ($browser) {
                     $browser->assertEnv('task', 'settings');
                     $browser->assertEnv('action', 'edit-prefs');
                 });
@@ -73,7 +74,7 @@ class GeneralTest extends \Tests\Browser\TestCase
 
                     $browser->assertSeeIn('label[for=rcmfd_refresh_interval]', 'Refresh');
                     $browser->assertVisible('select[name=_refresh_interval]');
-                    $browser->assertSelected('select[name=_refresh_interval]', $this->app->config->get('refresh_interval')/60);
+                    $browser->assertSelected('select[name=_refresh_interval]', $this->app->config->get('refresh_interval') / 60);
                 });
 
                 // TODO: Interface Skin fieldset
@@ -152,14 +153,14 @@ class GeneralTest extends \Tests\Browser\TestCase
         });
 
         // Assert the options have been saved in database properly
-        $prefs   = \bootstrap::get_prefs();
+        $prefs = \bootstrap::get_prefs();
         $options = array_diff(array_keys($this->settings), ['refresh_interval', 'pretty_date']);
 
         foreach ($options as $option) {
-            $this->assertEquals($this->settings[$option], $prefs[$option]);
+            $this->assertSame($this->settings[$option], $prefs[$option]);
         }
 
-        $this->assertEquals($this->settings['pretty_date'], $prefs['prettydate']);
-        $this->assertEquals($this->settings['refresh_interval'], $prefs['refresh_interval']/60);
+        $this->assertSame($this->settings['pretty_date'], $prefs['prettydate']);
+        $this->assertSame($this->settings['refresh_interval'], $prefs['refresh_interval'] / 60);
     }
 }

@@ -1,31 +1,30 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Test class to test rcube_enriched class
- *
- * @package Tests
  */
-class Framework_Enriched extends PHPUnit\Framework\TestCase
+class Framework_Enriched extends TestCase
 {
-
     /**
      * Class constructor
      */
-    function test_class()
+    public function test_class()
     {
         $object = new rcube_enriched();
 
-        $this->assertInstanceOf('rcube_enriched', $object, "Class constructor");
+        $this->assertInstanceOf('rcube_enriched', $object, 'Class constructor');
     }
 
     /**
      * Test to_html()
      */
-    function test_to_html()
+    public function test_to_html()
     {
         $enriched = '<bold><italic>the-text</italic></bold>';
         $expected = '<b><i>the-text</i></b>';
-        $result   = rcube_enriched::to_html($enriched);
+        $result = rcube_enriched::to_html($enriched);
 
         $this->assertSame($expected, $result);
     }
@@ -33,7 +32,7 @@ class Framework_Enriched extends PHPUnit\Framework\TestCase
     /**
      * Data for test_formatting()
      */
-    function data_formatting()
+    public static function provide_formatting_cases(): iterable
     {
         return [
             ['<bold>', '<b>'],
@@ -63,9 +62,10 @@ class Framework_Enriched extends PHPUnit\Framework\TestCase
 
     /**
      * Test formatting conversion
-     * @dataProvider data_formatting
+     *
+     * @dataProvider provide_formatting_cases
      */
-    function test_formatting($enriched, $expected)
+    public function test_formatting($enriched, $expected)
     {
         $result = rcube_enriched::to_html($enriched);
 

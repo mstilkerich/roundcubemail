@@ -1,6 +1,8 @@
 <?php
 
-class HttpAuthentication_Plugin extends PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+
+class HttpAuthentication_Plugin extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
@@ -10,13 +12,12 @@ class HttpAuthentication_Plugin extends PHPUnit\Framework\TestCase
     /**
      * Plugin object construction test
      */
-    function test_constructor()
+    public function test_constructor()
     {
-        $rcube  = rcube::get_instance();
+        $rcube = rcube::get_instance();
         $plugin = new http_authentication($rcube->plugins);
 
         $this->assertInstanceOf('http_authentication', $plugin);
         $this->assertInstanceOf('rcube_plugin', $plugin);
     }
 }
-

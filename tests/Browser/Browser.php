@@ -2,9 +2,11 @@
 
 namespace Tests\Browser;
 
+use Facebook\WebDriver\Exception\NoSuchElementException;
+use Facebook\WebDriver\Exception\StaleElementReferenceException;
+use Facebook\WebDriver\Exception\TimeoutException;
 use Facebook\WebDriver\WebDriverKeys;
 use PHPUnit\Framework\Assert;
-use Tests\Browser\Components;
 
 /**
  * Laravel Dusk Browser extensions
@@ -37,7 +39,7 @@ class Browser extends \Laravel\Dusk\Browser
      */
     public function assertEnvEquals($key, $expected)
     {
-        $this->assertEquals($expected, $this->getEnv($key));
+        Assert::assertEquals($expected, $this->getEnv($key));
 
         return $this;
     }
@@ -49,8 +51,7 @@ class Browser extends \Laravel\Dusk\Browser
     {
         if ($state) {
             $this->assertChecked($selector);
-        }
-        else {
+        } else {
             $this->assertNotChecked($selector);
         }
 
@@ -63,8 +64,8 @@ class Browser extends \Laravel\Dusk\Browser
     public function assertHasClass($selector, $class_name)
     {
         $fullSelector = $this->resolver->format($selector);
-        $element      = $this->resolver->findOrFail($selector);
-        $classes      = explode(' ', (string) $element->getAttribute('class'));
+        $element = $this->resolver->findOrFail($selector);
+        $classes = explode(' ', (string) $element->getAttribute('class'));
 
         Assert::assertContains($class_name, $classes);
 
@@ -76,7 +77,7 @@ class Browser extends \Laravel\Dusk\Browser
      */
     public function assertTaskMenu($selected)
     {
-        $this->with(new Components\Taskmenu(), function ($browser) use ($selected) {
+        $this->with(new Components\Taskmenu(), static function ($browser) use ($selected) {
             $browser->assertMenuState($selected);
         });
 
@@ -88,7 +89,7 @@ class Browser extends \Laravel\Dusk\Browser
      */
     public function assertToolbarMenu($active, $disabled = [], $missing = [])
     {
-        $this->with(new Components\Toolbarmenu(), function ($browser) use ($active, $disabled, $missing) {
+        $this->with(new Components\Toolbarmenu(), static function ($browser) use ($active, $disabled, $missing) {
             $browser->assertMenuState($active, $disabled, $missing);
         });
 
@@ -100,7 +101,7 @@ class Browser extends \Laravel\Dusk\Browser
      */
     public function closeToolbarMenu()
     {
-        $this->with(new Components\Toolbarmenu(), function ($browser) {
+        $this->with(new Components\Toolbarmenu(), static function ($browser) {
             $browser->closeMenu();
         });
 
@@ -112,7 +113,7 @@ class Browser extends \Laravel\Dusk\Browser
      */
     public function clickTaskMenuItem($name)
     {
-        $this->with(new Components\Taskmenu(), function ($browser) use ($name) {
+        $this->with(new Components\Taskmenu(), static function ($browser) use ($name) {
             $browser->clickMenuItem($name);
         });
 
@@ -122,10 +123,10 @@ class Browser extends \Laravel\Dusk\Browser
     /**
      * Select toolbar menu item
      */
-    public function clickToolbarMenuItem($name, $dropdown_action = null)
+    public function clickToolbarMenuItem($name, $dropdown_action = null, $close = true)
     {
-        $this->with(new Components\Toolbarmenu(), function ($browser) use ($name, $dropdown_action) {
-            $browser->clickMenuItem($name, $dropdown_action);
+        $this->with(new Components\Toolbarmenu(), static function ($browser) use ($name, $dropdown_action, $close) {
+            $browser->clickMenuItem($name, $dropdown_action, $close);
         });
 
         return $this;
@@ -144,11 +145,19 @@ class Browser extends \Laravel\Dusk\Browser
     }
 
     /**
+     * Return rcmail.env entry
+     */
+    public function getEnv($key)
+    {
+        return $this->driver->executeScript("return rcmail.env['{$key}']");
+    }
+
+    /**
      * Visit specified task/action with logon if needed
      */
     public function go($task = 'mail', $action = null, $login = true)
     {
-        $this->with(new Components\App(), function ($browser) use ($task, $action, $login) {
+        $this->with(new Components\App(), static function ($browser) use ($task, $action, $login) {
             $browser->gotoAction($task, $action, $login);
         });
 
@@ -182,7 +191,7 @@ class Browser extends \Laravel\Dusk\Browser
     /**
      * Handler for actions that expect to open a new window
      *
-     * @param callback $callback Function to execute with Browser object as argument
+     * @param callable $callback Function to execute with Browser object as argument
      *
      * @return array Main window handle and new window handle
      */
@@ -194,7 +203,7 @@ class Browser extends \Laravel\Dusk\Browser
         $callback($this);
 
         $after_handles = $this->driver->getWindowHandles();
-        $new_window    = array_first(array_diff($after_handles, $before_handles));
+        $new_window = array_first(array_diff($after_handles, $before_handles));
 
         return [$current_window, $new_window];
     }
@@ -209,14 +218,13 @@ class Browser extends \Laravel\Dusk\Browser
 
         if ($state) {
             $run = "if (!element.prev().is(':checked')) element.click()";
-        }
-        else {
+        } else {
             $run = "if (element.prev().is(':checked')) element.click()";
         }
 
         $this->script(
-            "var element = jQuery('$selector')[0] || jQuery('input[name=$selector]')[0];"
-            ."element = jQuery(element).next('.custom-control-label'); $run;"
+            "var element = jQuery('{$selector}')[0] || jQuery('input[name={$selector}]')[0];"
+            . "element = jQuery(element).next('.custom-control-label'); {$run};"
         );
 
         return $this;
@@ -227,11 +235,15 @@ class Browser extends \Laravel\Dusk\Browser
      */
     public function readDownloadedFile($filename)
     {
-        $filename = TESTS_DIR . "downloads/$filename";
+        $filename = TESTS_DIR . "downloads/{$filename}";
 
         // Give the browser a chance to finish download
-        if (!file_exists($filename)) {
-            sleep(2);
+        $n = 0;
+        while (!file_exists($filename)) {
+            if ($n++ > 5) {
+                break;
+            }
+            sleep(1);
         }
 
         Assert::assertFileExists($filename);
@@ -244,7 +256,7 @@ class Browser extends \Laravel\Dusk\Browser
      */
     public function removeDownloadedFile($filename)
     {
-        @unlink(TESTS_DIR . "downloads/$filename");
+        @unlink(TESTS_DIR . "downloads/{$filename}");
 
         return $this;
     }
@@ -262,11 +274,38 @@ class Browser extends \Laravel\Dusk\Browser
     }
 
     /**
+     * Wait for the given selector to be removed.
+     *
+     * @param string   $selector
+     * @param int|null $seconds
+     *
+     * @return $this
+     *
+     * @throws TimeoutException
+     */
+    public function waitUntilMissingOrStale($selector, $seconds = null)
+    {
+        $message = $this->formatTimeOutMessage('Waited %s seconds for removal of selector', $selector);
+
+        return $this->waitUsing($seconds, 100, function () use ($selector) {
+            try {
+                $missing = !$this->resolver->findOrFail($selector)->isDisplayed();
+            } catch (NoSuchElementException $e) {
+                $missing = true;
+            } catch (StaleElementReferenceException $e) {
+                $missing = true;
+            }
+
+            return $missing;
+        }, $message);
+    }
+
+    /**
      * Wait until the UI is unlocked
      */
     public function waitUntilNotBusy()
     {
-        $this->waitUntil("!rcmail.busy");
+        $this->waitUntil('!rcmail.busy');
 
         return $this;
     }

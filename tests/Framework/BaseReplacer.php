@@ -1,27 +1,26 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Test class to test rcube_base_replacer class
- *
- * @package Tests
  */
-class Framework_BaseReplacer extends PHPUnit\Framework\TestCase
+class Framework_BaseReplacer extends TestCase
 {
-
     /**
      * Class constructor
      */
-    function test_class()
+    public function test_class()
     {
         $object = new rcube_base_replacer('test');
 
-        $this->assertInstanceOf('rcube_base_replacer', $object, "Class constructor");
+        $this->assertInstanceOf('rcube_base_replacer', $object, 'Class constructor');
     }
 
     /**
      * Test replace()
      */
-    function test_replace()
+    public function test_replace()
     {
         $base = 'http://thisshouldntbetheurl.bob.com/';
         $html = '<A href=http://shouldbethislink.com>Test URL</A>';
@@ -35,7 +34,7 @@ class Framework_BaseReplacer extends PHPUnit\Framework\TestCase
     /**
      * Data for absolute_url() test
      */
-    function data_absolute_url()
+    public static function provide_absolute_url_cases(): iterable
     {
         return [
             ['', 'http://test', 'http://test/'],
@@ -50,12 +49,13 @@ class Framework_BaseReplacer extends PHPUnit\Framework\TestCase
 
     /**
      * Test absolute_url()
-     * @dataProvider data_absolute_url
+     *
+     * @dataProvider provide_absolute_url_cases
      */
-    function test_absolute_url($path, $base, $expected)
+    public function test_absolute_url($path, $base, $expected)
     {
         $replacer = new rcube_base_replacer('test');
-        $result   = $replacer->absolute_url($path, $base);
+        $result = $replacer->absolute_url($path, $base);
 
         $this->assertSame($expected, $result);
     }

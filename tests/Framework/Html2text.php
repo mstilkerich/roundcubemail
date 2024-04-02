@@ -1,103 +1,121 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Test class to test rcube_html2text class
- *
- * @package Tests
  */
-class rc_html2text extends PHPUnit\Framework\TestCase
+class rc_html2text extends TestCase
 {
-
-    function data_html2text()
+    public static function provide_html2text_cases(): iterable
     {
         return [
             0 => [
                 'title' => 'Test entry',
-                'in'    => '',
-                'out'   => '',
+                'in' => '',
+                'out' => '',
             ],
             1 => [
                 'title' => 'Basic HTML entities',
-                'in'    => '&quot;&amp;',
-                'out'   => '"&',
+                'in' => '&quot;&amp;',
+                'out' => '"&',
             ],
             2 => [
                 'title' => 'HTML entity string',
-                'in'    => '&amp;quot;',
-                'out'   => '&quot;',
+                'in' => '&amp;quot;',
+                'out' => '&quot;',
             ],
             3 => [
                 'title' => 'HTML entity in H1 tag',
-                'in'    => '<h1>&#347;</h1>', // ś
-                'out'   => "Ś\n\n", // upper ś
+                'in' => '<h1>&#347;</h1>', // ś
+                'out' => "Ś\n\n", // upper ś
             ],
             4 => [
                 'title' => 'H1 tag to upper-case conversion',
-                'in'    => '<h1>ś</h1>',
-                'out'   => "Ś\n\n",
+                'in' => '<h1>ś</h1>',
+                'out' => "Ś\n\n",
             ],
             5 => [
                 'title' => 'H1 inside B tag',
-                'in'    => '<b><h1>&#347;</h1></b>',
-                'out'   => "Ś\n\n",
+                'in' => '<b><h1>&#347;</h1></b>',
+                'out' => "Ś\n\n",
             ],
             6 => [
                 'title' => 'Don\'t remove non-printable chars',
-                'in'    => chr(0x002).chr(0x003),
-                'out'   => chr(0x002).chr(0x003),
+                'in' => chr(0x002) . chr(0x003),
+                'out' => chr(0x002) . chr(0x003),
             ],
             7 => [
                 'title' => 'Remove spaces after <br>',
-                'in'    => 'test<br>  test',
-                'out'   => "test\ntest",
+                'in' => 'test<br>  test',
+                'out' => "test\ntest",
             ],
             8 => [
                 'title' => '&nbsp; handling test',
-                'in'    => '<div>eye: &nbsp;&nbsp;test<br /> test: &nbsp;&nbsp;test</div>',
-                'out'   => "eye:   test\ntest:   test",
+                'in' => '<div>eye: &nbsp;&nbsp;test<br /> test: &nbsp;&nbsp;test</div>',
+                'out' => "eye:   test\ntest:   test",
             ],
             9 => [
                 'title' => 'HTML entity in STRONG tag',
-                'in'    => '<strong>&#347;</strong>', // ś
-                'out'   => 'ś',
+                'in' => '<strong>&#347;</strong>', // ś
+                'out' => 'ś',
             ],
             10 => [
                 'title' => 'STRONG tag to upper-case conversion',
-                'in'    => '<strong>ś</strong>',
-                'out'   => 'ś',
+                'in' => '<strong>ś</strong>',
+                'out' => 'ś',
             ],
             11 => [
                 'title' => 'STRONG inside B tag',
-                'in'    => '<b><strong>&#347;</strong></b>',
-                'out'   => 'ś',
+                'in' => '<b><strong>&#347;</strong></b>',
+                'out' => 'ś',
+            ],
+            12 => [
+                'title' => 'Full HTML handling (html tag only)',
+                'in' => "<html>\n<p>test</p></html>",
+                'out' => 'test',
+            ],
+            13 => [
+                'title' => 'Full HTML handling (html+head tags)',
+                'in' => '<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /></head>'
+                    . "\n<p>test</p></html>\n",
+                'out' => 'test',
+            ],
+            14 => [
+                'title' => 'Full HTML handling (html+head+body tags)',
+                'in' => '<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /></head>' . "\n"
+                    . '<body style="font-size: 10pt; font-family: Verdana,Geneva,sans-serif">' . "\n"
+                    . '<p>test</p>'
+                    . '</body></html>',
+                'out' => 'test',
             ],
         ];
     }
 
     /**
-     * @dataProvider data_html2text
+     * @dataProvider provide_html2text_cases
      */
-    function test_html2text($title, $in, $out)
+    public function test_html2text($title, $in, $out)
     {
         $ht = new rcube_html2text(null, false, rcube_html2text::LINKS_NONE);
 
         $ht->set_html($in);
         $res = $ht->get_text();
 
-        $this->assertEquals($out, $res, $title);
+        $this->assertSame($out, $res, $title);
     }
 
     /**
      * Test blockquote tags handling
      */
-    function test_multiple_blockquotes()
+    public function test_multiple_blockquotes()
     {
-        $html = <<<EOF
-<br>Begin<br><blockquote>OUTER BEGIN<blockquote>INNER 1<br></blockquote><div><br></div><div>Par 1</div>
-<blockQuote>INNER 2</blockquote><div><br></div><div>Par 2</div>
-<div><br></div><div>Par 3</div><div><br></div>
-<blockquote>INNER 3</blockquote>OUTER END</blockquote>
-EOF;
+        $html = <<<'EOF'
+            <br>Begin<br><blockquote>OUTER BEGIN<blockquote>INNER 1<br></blockquote><div><br></div><div>Par 1</div>
+            <blockQuote>INNER 2</blockquote><div><br></div><div>Par 2</div>
+            <div><br></div><div>Par 3</div><div><br></div>
+            <blockquote>INNER 3</blockquote>OUTER END</blockquote>
+            EOF;
         $ht = new rcube_html2text($html, false, rcube_html2text::LINKS_NONE);
         $res = $ht->get_text();
 
@@ -106,28 +124,28 @@ EOF;
         $this->assertStringContainsString('> OUTER END', $res, 'Quote outer');
     }
 
-    function test_broken_blockquotes()
+    public function test_broken_blockquotes()
     {
         // no end tag
-        $html = <<<EOF
-Begin<br>
-<blockquote>QUOTED TEXT
-<blockquote>
-NO END TAG FOUND
-EOF;
+        $html = <<<'EOF'
+            Begin<br>
+            <blockquote>QUOTED TEXT
+            <blockquote>
+            NO END TAG FOUND
+            EOF;
         $ht = new rcube_html2text($html, false, rcube_html2text::LINKS_NONE);
         $res = $ht->get_text();
 
         $this->assertStringContainsString('QUOTED TEXT NO END TAG FOUND', $res, 'No quoting on invalid html');
 
         // with some (nested) end tags
-        $html = <<<EOF
-Begin<br>
-<blockquote>QUOTED TEXT
-<blockquote>INNER 1</blockquote>
-<blockquote>INNER 2</blockquote>
-NO END TAG FOUND
-EOF;
+        $html = <<<'EOF'
+            Begin<br>
+            <blockquote>QUOTED TEXT
+            <blockquote>INNER 1</blockquote>
+            <blockquote>INNER 2</blockquote>
+            NO END TAG FOUND
+            EOF;
         $ht = new rcube_html2text($html, false, rcube_html2text::LINKS_NONE);
         $res = $ht->get_text();
 
@@ -137,9 +155,9 @@ EOF;
     /**
      * Test links handling
      */
-    function test_links()
+    public function test_links()
     {
-        $html     = '<a href="http://test.com">content</a>';
+        $html = '<a href="http://test.com">content</a>';
         $expected = 'content [1]
 
 Links:
@@ -153,21 +171,35 @@ Links:
         $this->assertSame($expected, $res, 'Links list');
 
         // href == content (#1490434)
-        $html     = '<a href="http://test.com">http://test.com</a>';
+        $html = '<a href="http://test.com">http://test.com</a>';
         $expected = 'http://test.com';
 
         $ht = new rcube_html2text($html, false, rcube_html2text::LINKS_END);
         $res = $ht->get_text();
 
         $this->assertSame($expected, $res, 'Skip link with href == content');
+
+        // HTML entities in links
+        $html = '<a href="http://test.com?test1&amp;test2">test3&amp;test4</a>';
+        $expected = 'test3&test4 [1]
+
+Links:
+------
+[1] http://test.com?test1&test2
+';
+
+        $ht = new rcube_html2text($html, false, rcube_html2text::LINKS_END);
+        $res = $ht->get_text();
+
+        $this->assertSame($expected, $res, 'Links with HTML entities');
     }
 
     /**
      * Test links handling with backward compatibility boolean flag
      */
-    function test_links_bc_with_boolean()
+    public function test_links_bc_with_boolean()
     {
-        $html     = '<a href="http://test.com">content</a>';
+        $html = '<a href="http://test.com">content</a>';
         $expected = 'content [1]
 
 Links:
@@ -181,7 +213,7 @@ Links:
         $this->assertSame($expected, $res, 'Links list');
 
         // href == content (#1490434)
-        $html     = '<a href="http://test.com">http://test.com</a>';
+        $html = '<a href="http://test.com">http://test.com</a>';
         $expected = 'http://test.com';
 
         $ht = new rcube_html2text($html, false, true);
@@ -193,9 +225,9 @@ Links:
     /**
      * Test links inline handling
      */
-    function test_links_inline()
+    public function test_links_inline()
     {
-        $html     = '<a href="http://test.com">content</a>';
+        $html = '<a href="http://test.com">content</a>';
         $expected = 'content <http://test.com>';
 
         $ht = new rcube_html2text($html, false, rcube_html2text::LINKS_INLINE);
@@ -204,7 +236,7 @@ Links:
         $this->assertSame($expected, $res, 'Links Inline');
 
         // href == content (#1490434)
-        $html     = '<a href="http://test.com">http://test.com</a>';
+        $html = '<a href="http://test.com">http://test.com</a>';
         $expected = 'http://test.com';
 
         $ht = new rcube_html2text($html, false, rcube_html2text::LINKS_INLINE);
@@ -216,9 +248,9 @@ Links:
     /**
      * Test <a> links handling when not using link list (#5795)
      *
-     * @dataProvider data_links_no_list
+     * @dataProvider provide_links_no_list_cases
      */
-    function test_links_no_list($input, $output)
+    public function test_links_no_list($input, $output)
     {
         $h2t = new rcube_html2text($input, false, rcube_html2text::LINKS_NONE);
         $res = $h2t->get_text();
@@ -229,9 +261,9 @@ Links:
     /**
      * Test <a> links handling when not using link list (#5795) with backward compatibility boolean flag
      *
-     * @dataProvider data_links_no_list
+     * @dataProvider provide_links_no_list_cases
      */
-    function test_links_no_list_bc_with_boolean($input, $output)
+    public function test_links_no_list_bc_with_boolean($input, $output)
     {
         $h2t = new rcube_html2text($input, false, false);
         $res = $h2t->get_text();
@@ -239,7 +271,7 @@ Links:
         $this->assertSame($output, $res, 'Links handling');
     }
 
-    function data_links_no_list()
+    public static function provide_links_no_list_cases(): iterable
     {
         return [
             [
@@ -264,9 +296,9 @@ Links:
     /**
      * Test links fallback to default handling
      */
-    function test_links_fallback_to_default_link_list()
+    public function test_links_fallback_to_default_link_list()
     {
-        $html     = '<a href="http://test.com">content</a>';
+        $html = '<a href="http://test.com">content</a>';
         $expected = 'content [1]
 
 Links:
@@ -293,7 +325,7 @@ Links:
     /**
      * Test huge HTML content (#8137)
      */
-    function test_memory_fix_8137()
+    public function test_memory_fix_8137()
     {
         // create >1MB input
         $src = 'data:image/png;base64,' . str_repeat('1234567890abcdefghijklmnopqrstuvwxyz', 50000);

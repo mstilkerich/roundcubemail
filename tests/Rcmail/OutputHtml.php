@@ -1,16 +1,16 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Test class to test rcmail_output_html class
- *
- * @package Tests
  */
-class Rcmail_RcmailOutputHtml extends PHPUnit\Framework\TestCase
+class Rcmail_RcmailOutputHtml extends TestCase
 {
     /**
      * Test check_skin()
      */
-    function test_check_skin()
+    public function test_check_skin()
     {
         $rcmail = rcube::get_instance();
         $output = new rcmail_output_html();
@@ -22,7 +22,7 @@ class Rcmail_RcmailOutputHtml extends PHPUnit\Framework\TestCase
     /**
      * Test get_skin_file()
      */
-    function test_get_skin_file()
+    public function test_get_skin_file()
     {
         $rcmail = rcube::get_instance();
         $output = new rcmail_output_html();
@@ -36,13 +36,13 @@ class Rcmail_RcmailOutputHtml extends PHPUnit\Framework\TestCase
     /**
      * Test get_template_logo()
      */
-    function test_logo()
+    public function test_logo()
     {
-        $rcmail            = rcube::get_instance();
-        $output            = new rcmail_output_html();
-        $reflection        = new ReflectionClass('rcmail_output_html');
-        $set_skin          = $reflection->getProperty('skin_name');
-        $set_template      = $reflection->getProperty('template_name');
+        $rcmail = rcube::get_instance();
+        $output = new rcmail_output_html();
+        $reflection = new ReflectionClass('rcmail_output_html');
+        $set_skin = $reflection->getProperty('skin_name');
+        $set_template = $reflection->getProperty('template_name');
         $get_template_logo = $reflection->getMethod('get_template_logo');
 
         $set_skin->setAccessible(true);
@@ -60,21 +60,23 @@ class Rcmail_RcmailOutputHtml extends PHPUnit\Framework\TestCase
         $set_template->setValue($output, 'mail');
         $result = $get_template_logo->invokeArgs($output, ['small']);
         $this->assertSame('img00', $result);
+        $result = $get_template_logo->invokeArgs($output, ['link']);
+        $this->assertNull($result);
 
         $rcmail->config->set('skin_logo', [
-                "elastic:login[small]" => "img01",
-                "elastic:login"        => "img02",
-                "elastic:*[small]"     => "img03",
-                "larry:*"              => "img04",
-                "*:login[small]"       => "img05",
-                "*:login"              => "img06",
-                "*[print]"             => "img07",
-                "*"                    => "img08",
+            'elastic:login[small]' => 'img01',
+            'elastic:login' => 'img02',
+            'elastic:*[small]' => 'img03',
+            'larry:*' => 'img04',
+            '*:login[small]' => 'img05',
+            '*:login' => 'img06',
+            '*[print]' => 'img07',
+            '*' => 'img08',
         ]);
 
         $set_template->setValue($output, 'login');
         $result = $get_template_logo->invokeArgs($output, ['favicon']);
-        $this->assertSame(null, $result);
+        $this->assertNull($result);
 
         $set_template->setValue($output, 'login');
         $result = $get_template_logo->invokeArgs($output, ['favicon', 'template']);
@@ -116,7 +118,7 @@ class Rcmail_RcmailOutputHtml extends PHPUnit\Framework\TestCase
 
         $set_template->setValue($output, 'login');
         $result = $get_template_logo->invokeArgs($output, ['favicon']);
-        $this->assertSame(null, $result);
+        $this->assertNull($result);
 
         $set_template->setValue($output, 'login');
         $result = $get_template_logo->invokeArgs($output, ['favicon', 'template']);
@@ -150,7 +152,7 @@ class Rcmail_RcmailOutputHtml extends PHPUnit\Framework\TestCase
 
         $set_template->setValue($output, 'login');
         $result = $get_template_logo->invokeArgs($output, ['favicon']);
-        $this->assertSame(null, $result);
+        $this->assertNull($result);
 
         $set_template->setValue($output, 'login');
         $result = $get_template_logo->invokeArgs($output, ['print', 'template']);
@@ -170,7 +172,7 @@ class Rcmail_RcmailOutputHtml extends PHPUnit\Framework\TestCase
 
         $set_template->setValue($output, '_test_');
         $result = $get_template_logo->invokeArgs($output, ['_test_']);
-        $this->assertSame(null, $result);
+        $this->assertNull($result);
 
         $set_template->setValue($output, '_test_');
         $result = $get_template_logo->invokeArgs($output, []);
@@ -185,14 +187,14 @@ class Rcmail_RcmailOutputHtml extends PHPUnit\Framework\TestCase
         $this->assertSame('img07', $result);
 
         $rcmail->config->set('skin_logo', [
-                "elastic:login[small]" => "img09",
-                "elastic:login"        => "img10",
-                "larry:*"              => "img11",
-                "elastic[small]"       => "img12",
-                "login[small]"         => "img13",
-                "login"                => "img14",
-                "[print]"              => "img15",
-                "*"                    => "img16",
+            'elastic:login[small]' => 'img09',
+            'elastic:login' => 'img10',
+            'larry:*' => 'img11',
+            'elastic[small]' => 'img12',
+            'login[small]' => 'img13',
+            'login' => 'img14',
+            '[print]' => 'img15',
+            '*' => 'img16',
         ]);
 
         $set_skin->setValue($output, 'elastic');
@@ -203,7 +205,7 @@ class Rcmail_RcmailOutputHtml extends PHPUnit\Framework\TestCase
 
         $set_template->setValue($output, 'mail');
         $result = $get_template_logo->invokeArgs($output, ['small']);
-        $this->assertSame(null, $result);
+        $this->assertNull($result);
 
         $set_skin->setValue($output, '_test_');
 
@@ -225,20 +227,20 @@ class Rcmail_RcmailOutputHtml extends PHPUnit\Framework\TestCase
 
         $set_template->setValue($output, '_test_');
         $result = $get_template_logo->invokeArgs($output, ['_test_', 'template']);
-        $this->assertSame(null, $result);
+        $this->assertNull($result);
 
         $set_template->setValue($output, '_test_');
         $result = $get_template_logo->invokeArgs($output, ['_test_']);
-        $this->assertSame(null, $result);
+        $this->assertNull($result);
 
         $set_template->setValue($output, '_test_');
         $result = $get_template_logo->invokeArgs($output, []);
         $this->assertSame('img16', $result);
 
         $rcmail->config->set('skin_logo', [
-                "elastic:[print]"      => "img17",
-                "elastic:messageprint" => "img18",
-                "elastic:*"            => "img19",
+            'elastic:[print]' => 'img17',
+            'elastic:messageprint' => 'img18',
+            'elastic:*' => 'img19',
         ]);
 
         $set_skin->setValue($output, 'elastic');
@@ -257,7 +259,7 @@ class Rcmail_RcmailOutputHtml extends PHPUnit\Framework\TestCase
 
         $set_template->setValue($output, 'contactprint');
         $result = $get_template_logo->invokeArgs($output, ['_test_', 'template']);
-        $this->assertSame(null, $result);
+        $this->assertNull($result);
 
         $set_template->setValue($output, 'contactprint');
         $result = $get_template_logo->invokeArgs($output, ['_test_', 'all']);
@@ -271,62 +273,62 @@ class Rcmail_RcmailOutputHtml extends PHPUnit\Framework\TestCase
     /**
      * Data for test_conditions()
      */
-    function data_conditions()
+    public static function provide_conditions_cases(): iterable
     {
-        $txt = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt "
-            . "ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco "
-            . "laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in "
-            . "voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat "
-            . "non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+        $txt = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt '
+            . 'ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco '
+            . 'laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in '
+            . 'voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat '
+            . 'non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
 
         return [
-            ["_start_<roundcube:if condition='1' />A<roundcube:endif />_end_", "_start_A_end_"],
-            ["_start_<roundcube:if condition='0' />A<roundcube:else />B<roundcube:endif />_end_", "_start_B_end_"],
-            ["_start_<roundcube:if condition='0'/>A<roundcube:else/>B<roundcube:endif/>_end_", "_start_B_end_"],
-            ["_start_<roundcube:if condition='0'>A<roundcube:else>B<roundcube:endif>_end_", "_start_B_end_"],
-            ["_start_<roundcube:if condition='0' />A<roundcube:elseif condition='1' />B<roundcube:else />C<roundcube:endif />_end_", "_start_B_end_"],
-            ["_start_<roundcube:if condition='1' /><roundcube:if condition='0' />A<roundcube:else />B<roundcube:endif />C<roundcube:else />D<roundcube:endif />_end_", "_start_BC_end_"],
-            ["_start_<roundcube:if condition='1' /><roundcube:if condition='1' />A<roundcube:else />B<roundcube:endif />C<roundcube:else />D<roundcube:endif />_end_", "_start_AC_end_"],
-            ["_start_<roundcube:if condition='1' /><roundcube:if condition='0' />A<roundcube:elseif condition='1' />B<roundcube:else />C<roundcube:endif />D<roundcube:else />E<roundcube:endif />_end_", "_start_BD_end_"],
-            ["_start_<roundcube:if condition='0' />A<roundcube:elseif condition='1' /><roundcube:if condition='0' />B<roundcube:else /><roundcube:if condition='1' />C<roundcube:endif />D<roundcube:endif /><roundcube:else />E<roundcube:endif />_end_", "_start_CD_end_"],
-            ["_start_<roundcube:if condition='0'>A<roundcube:elseif condition='1'><roundcube:if condition='0'>B<roundcube:else><roundcube:if condition='1'>C<roundcube:endif>D<roundcube:endif><roundcube:else>E<roundcube:endif>_end_", "_start_CD_end_"],
-            ["_start_<roundcube:if condition='1'>A<roundcube:elseif condition='1'>B<roundcube:elseif condition='1'>C<roundcube:endif>_end_", "_start_A_end_"],
-            ["_start_<roundcube:if condition='0'>A<roundcube:elseif condition='1'>B<roundcube:elseif condition='1'>C<roundcube:endif>_end_", "_start_B_end_"],
-            ["_start_<roundcube:if condition='0'>A<roundcube:elseif condition='0'>B<roundcube:elseif condition='1'>C<roundcube:endif>_end_", "_start_C_end_"],
+            ["_start_<roundcube:if condition='1' />A<roundcube:endif />_end_", '_start_A_end_'],
+            ["_start_<roundcube:if condition='0' />A<roundcube:else />B<roundcube:endif />_end_", '_start_B_end_'],
+            ["_start_<roundcube:if condition='0'/>A<roundcube:else/>B<roundcube:endif/>_end_", '_start_B_end_'],
+            ["_start_<roundcube:if condition='0'>A<roundcube:else>B<roundcube:endif>_end_", '_start_B_end_'],
+            ["_start_<roundcube:if condition='0' />A<roundcube:elseif condition='1' />B<roundcube:else />C<roundcube:endif />_end_", '_start_B_end_'],
+            ["_start_<roundcube:if condition='1' /><roundcube:if condition='0' />A<roundcube:else />B<roundcube:endif />C<roundcube:else />D<roundcube:endif />_end_", '_start_BC_end_'],
+            ["_start_<roundcube:if condition='1' /><roundcube:if condition='1' />A<roundcube:else />B<roundcube:endif />C<roundcube:else />D<roundcube:endif />_end_", '_start_AC_end_'],
+            ["_start_<roundcube:if condition='1' /><roundcube:if condition='0' />A<roundcube:elseif condition='1' />B<roundcube:else />C<roundcube:endif />D<roundcube:else />E<roundcube:endif />_end_", '_start_BD_end_'],
+            ["_start_<roundcube:if condition='0' />A<roundcube:elseif condition='1' /><roundcube:if condition='0' />B<roundcube:else /><roundcube:if condition='1' />C<roundcube:endif />D<roundcube:endif /><roundcube:else />E<roundcube:endif />_end_", '_start_CD_end_'],
+            ["_start_<roundcube:if condition='0'>A<roundcube:elseif condition='1'><roundcube:if condition='0'>B<roundcube:else><roundcube:if condition='1'>C<roundcube:endif>D<roundcube:endif><roundcube:else>E<roundcube:endif>_end_", '_start_CD_end_'],
+            ["_start_<roundcube:if condition='1'>A<roundcube:elseif condition='1'>B<roundcube:elseif condition='1'>C<roundcube:endif>_end_", '_start_A_end_'],
+            ["_start_<roundcube:if condition='0'>A<roundcube:elseif condition='1'>B<roundcube:elseif condition='1'>C<roundcube:endif>_end_", '_start_B_end_'],
+            ["_start_<roundcube:if condition='0'>A<roundcube:elseif condition='0'>B<roundcube:elseif condition='1'>C<roundcube:endif>_end_", '_start_C_end_'],
             // #8065
             [
                 "_start_<roundcube:if condition='0'>Condition 1 {$txt} {$txt}<roundcube:elseif condition='1'>Condition 2 {$txt} {$txt}"
                     . "<roundcube:elseif condition='0'>Condition 3 {$txt} {$txt}<roundcube:elseif condition='0'>Condition 4 {$txt} {$txt}"
                     . "<roundcube:elseif condition='0'>Condition 5 {$txt} {$txt}<roundcube:elseif condition='0'>Condition 6 {$txt} {$txt}"
-                    . "<roundcube:endif>_end_",
-                "_start_Condition 2 {$txt} {$txt}_end_"
+                    . '<roundcube:endif>_end_',
+                "_start_Condition 2 {$txt} {$txt}_end_",
             ],
             // some invalid code
-            ["_start_<roundcube:if condition='1' />_end_", "_start__end_"],
-            ["_start_<roundcube:if condition='0' />_end_", "_start_"],
-            ["_start_<roundcube:if condition='1' />A<roundcube:else />_end_", "_start_A"],
-            ["_start_<roundcube:if condition='1' />A<roundcube:elseif condition='1' />_end_", "_start_A"],
-            ["_start_<roundcube:if />A<roundcube:endif />_end_", "_start__end_"],
+            ["_start_<roundcube:if condition='1' />_end_", '_start__end_'],
+            ["_start_<roundcube:if condition='0' />_end_", '_start_'],
+            ["_start_<roundcube:if condition='1' />A<roundcube:else />_end_", '_start_A'],
+            ["_start_<roundcube:if condition='1' />A<roundcube:elseif condition='1' />_end_", '_start_A'],
+            ['_start_<roundcube:if />A<roundcube:endif />_end_', '_start__end_'],
         ];
     }
 
     /**
      * Test text to html conversion
      *
-     * @dataProvider data_conditions
+     * @dataProvider provide_conditions_cases
      */
-    function test_conditions($input, $output)
+    public function test_conditions($input, $output)
     {
-        $object = new rcmail_output_html;
+        $object = new rcmail_output_html();
         $result = $object->just_parse($input);
 
-        $this->assertEquals($output, $result);
+        $this->assertSame($output, $result);
     }
 
     /**
      * Test reset()
      */
-    function test_reset()
+    public function test_reset()
     {
         $rcmail = rcube::get_instance();
         $output = new rcmail_output_html();
@@ -337,7 +339,7 @@ class Rcmail_RcmailOutputHtml extends PHPUnit\Framework\TestCase
     /**
      * Test abs_url()
      */
-    function test_abs_url()
+    public function test_abs_url()
     {
         $rcmail = rcube::get_instance();
         $output = new rcmail_output_html();
@@ -349,7 +351,7 @@ class Rcmail_RcmailOutputHtml extends PHPUnit\Framework\TestCase
     /**
      * Test asset_url()
      */
-    function test_asset_url()
+    public function test_asset_url()
     {
         $rcmail = rcube::get_instance();
         $output = new rcmail_output_html();
@@ -362,7 +364,7 @@ class Rcmail_RcmailOutputHtml extends PHPUnit\Framework\TestCase
     /**
      * Test button()
      */
-    function test_button()
+    public function test_button()
     {
         $rcmail = rcube::get_instance();
         $output = new rcmail_output_html();
@@ -376,18 +378,18 @@ class Rcmail_RcmailOutputHtml extends PHPUnit\Framework\TestCase
     /**
      * Test form_tag()
      */
-    function test_form_tag()
+    public function test_form_tag()
     {
         $rcmail = rcube::get_instance();
         $output = new rcmail_output_html();
 
-        $this->assertSame('<form action="./phpunit?_task=cli" method="get">test</form>', $output->form_tag([], 'test'));
+        $this->assertSame('<form action="vendor/bin/phpunit?_task=cli" method="get">test</form>', $output->form_tag([], 'test'));
     }
 
     /**
      * Test request_form()
      */
-    function test_request_form()
+    public function test_request_form()
     {
         $rcmail = rcube::get_instance();
         $output = new rcmail_output_html();
@@ -398,13 +400,13 @@ class Rcmail_RcmailOutputHtml extends PHPUnit\Framework\TestCase
     /**
      * Test search_form()
      */
-    function test_search_form()
+    public function test_search_form()
     {
         $rcmail = rcube::get_instance();
         $output = new rcmail_output_html();
 
         $expected = '<form name="rcmqsearchform" onsubmit="rcmail.command(\'search\'); return false"'
-            . ' action="./phpunit?_task=cli" method="get"><label for="rcmqsearchbox" class="voice">Search terms</label>'
+            . ' action="vendor/bin/phpunit?_task=cli" method="get"><label for="rcmqsearchbox" class="voice">Search terms</label>'
             . '<input name="_q" class="no-bs" id="rcmqsearchbox" placeholder="Search..." type="text"></form>';
 
         $this->assertSame($expected, $output->search_form([]));
@@ -413,7 +415,7 @@ class Rcmail_RcmailOutputHtml extends PHPUnit\Framework\TestCase
     /**
      * Test charset_selector()
      */
-    function test_charset_selector()
+    public function test_charset_selector()
     {
         $rcmail = rcube::get_instance();
         $output = new rcmail_output_html();

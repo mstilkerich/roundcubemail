@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  +-----------------------------------------------------------------------+
  | This file is part of the Roundcube Webmail client                     |
  |                                                                       |
@@ -19,9 +19,6 @@
 
 /**
  * PHP stream filter to detect html/javascript code in attachments
- *
- * @package    Framework
- * @subpackage Utils
  */
 class rcube_content_filter extends php_user_filter
 {
@@ -42,7 +39,7 @@ class rcube_content_filter extends php_user_filter
 
             // check for evil content and abort
             if (preg_match('/<(script|iframe|object)/i', $this->buffer)) {
-                return PSFS_ERR_FATAL;
+                return \PSFS_ERR_FATAL;
             }
 
             // keep buffer small enough
@@ -50,10 +47,10 @@ class rcube_content_filter extends php_user_filter
                 $this->buffer = substr($this->buffer, $this->cutoff);
             }
 
-            $consumed += $bucket->datalen;
+            $consumed += (int) $bucket->datalen;
             stream_bucket_append($out, $bucket);
         }
 
-        return PSFS_PASS_ON;
+        return \PSFS_PASS_ON;
     }
 }

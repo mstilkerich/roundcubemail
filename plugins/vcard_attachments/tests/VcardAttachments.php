@@ -1,6 +1,8 @@
 <?php
 
-class VcardAttachments_Plugin extends PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+
+class VcardAttachments_Plugin extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
@@ -10,9 +12,9 @@ class VcardAttachments_Plugin extends PHPUnit\Framework\TestCase
     /**
      * Plugin object construction test
      */
-    function test_constructor()
+    public function test_constructor()
     {
-        $rcube  = rcube::get_instance();
+        $rcube = rcube::get_instance();
         $plugin = new vcard_attachments($rcube->plugins);
 
         $this->assertInstanceOf('vcard_attachments', $plugin);
@@ -22,9 +24,9 @@ class VcardAttachments_Plugin extends PHPUnit\Framework\TestCase
     /**
      * Test is_vcard()
      */
-    function test_is_vcard()
+    public function test_is_vcard()
     {
-        $rcube  = rcube::get_instance();
+        $rcube = rcube::get_instance();
         $plugin = new vcard_attachments($rcube->plugins);
 
         $part = new rcube_message_part();

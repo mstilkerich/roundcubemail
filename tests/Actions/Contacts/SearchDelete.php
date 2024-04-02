@@ -2,17 +2,15 @@
 
 /**
  * Test class to test rcmail_action_contacts_search_delete
- *
- * @package Tests
  */
 class Actions_Contacts_Search_Delete extends ActionTestCase
 {
     /**
      * Test error handling
      */
-    function test_search_delete_errors()
+    public function test_search_delete_errors()
     {
-        $action = new rcmail_action_contacts_search_delete;
+        $action = new rcmail_action_contacts_search_delete();
         $output = $this->initOutput(rcmail_action::MODE_AJAX, 'contacts', 'search-delete');
 
         $this->assertInstanceOf('rcmail_action', $action);
@@ -32,19 +30,19 @@ class Actions_Contacts_Search_Delete extends ActionTestCase
     /**
      * Test deleting a saved-search
      */
-    function test_search_create_success()
+    public function test_search_create_success()
     {
-        $action = new rcmail_action_contacts_search_delete;
+        $action = new rcmail_action_contacts_search_delete();
         $output = $this->initOutput(rcmail_action::MODE_AJAX, 'contacts', 'search-delete');
 
         $this->assertTrue($action->checks());
 
         self::initDB('searches');
 
-        $db     = rcmail::get_instance()->get_dbh();
-        $query  = $db->query('SELECT * FROM `searches` WHERE `name` = \'test\'');
+        $db = rcmail::get_instance()->get_dbh();
+        $query = $db->query('SELECT * FROM `searches` WHERE `name` = \'test\'');
         $result = $db->fetch_assoc($query);
-        $sid    = $result['search_id'];
+        $sid = $result['search_id'];
 
         $_POST = ['_sid' => $sid];
 
@@ -59,7 +57,7 @@ class Actions_Contacts_Search_Delete extends ActionTestCase
         $this->assertTrue(strpos($result['exec'], 'this.remove_search_item("' . $sid . '")') !== false);
         $this->assertTrue(strpos($result['exec'], 'this.set_rowcount("No contacts found.");') !== false);
 
-        $query  = $db->query('SELECT * FROM `searches` WHERE `name` = \'test\'');
+        $query = $db->query('SELECT * FROM `searches` WHERE `name` = \'test\'');
         $result = $db->fetch_assoc($query);
 
         $this->assertTrue(empty($result));

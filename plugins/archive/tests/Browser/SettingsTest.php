@@ -2,7 +2,9 @@
 
 namespace Tests\Browser\Plugins\Archive;
 
-class SettingsTest extends \Tests\Browser\TestCase
+use Tests\Browser\TestCase;
+
+class SettingsTest extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
@@ -14,11 +16,11 @@ class SettingsTest extends \Tests\Browser\TestCase
      */
     public function testFolders()
     {
-        $this->browse(function ($browser) {
+        $this->browse(static function ($browser) {
             $browser->go('settings', 'folders');
 
             // Folders list
-            $browser->with('#subscription-table', function ($browser) {
+            $browser->with('#subscription-table', static function ($browser) {
                 $browser->assertHasClass('li:nth-child(7)', 'archive')
                     ->assertSeeIn('li:nth-child(7)', 'Archive')
                     ->assertPresent('li:nth-child(7) [type=checkbox][disabled]');
@@ -31,7 +33,7 @@ class SettingsTest extends \Tests\Browser\TestCase
      */
     public function testPreferences()
     {
-        $this->browse(function ($browser) {
+        $this->browse(static function ($browser) {
             $browser->go('settings');
 
             if (!$browser->isDesktop()) {
@@ -45,13 +47,13 @@ class SettingsTest extends \Tests\Browser\TestCase
                 $browser->waitFor('#layout-content .footer a.button.submit:not(.disabled)');
             }
 
-            $browser->withinFrame('#preferences-frame', function ($browser) {
+            $browser->withinFrame('#preferences-frame', static function ($browser) {
                 if (!$browser->isPhone()) {
                     $browser->waitFor('.formbuttons button.submit');
                 }
 
                 // Main Options fieldset
-                $browser->with('form.propform fieldset.main', function ($browser) {
+                $browser->with('form.propform fieldset.main', static function ($browser) {
                     $browser->assertSeeIn('legend', 'Main Options');
 
                     $browser->assertSeeIn('label[for=_archive_mbox]', 'Archive')
@@ -62,13 +64,13 @@ class SettingsTest extends \Tests\Browser\TestCase
                 });
 
                 // Archive fieldset
-                $browser->with('form.propform fieldset.archive', function ($browser) {
+                $browser->with('form.propform fieldset.archive', static function ($browser) {
                     $browser->assertSeeIn('legend', 'Archive');
 
                     $browser->assertSeeIn('label[for=ff_archive_type]', 'Divide archive by')
                         ->assertVisible('select[name=_archive_type]')
                         ->assertSelected('select[name=_archive_type]', '')
-                        ->with('select[name=_archive_type]', function ($browser) {
+                        ->with('select[name=_archive_type]', static function ($browser) {
                             $browser->assertValue('option:nth-child(1)', '')
                                 ->assertSeeIn('option:nth-child(1)', 'None')
                                 ->assertValue('option:nth-child(2)', 'year')
@@ -99,7 +101,7 @@ class SettingsTest extends \Tests\Browser\TestCase
             $browser->waitForMessage('confirmation', 'Successfully saved');
 
             // Verify if every option has been updated
-            $browser->withinFrame('#preferences-frame', function ($browser) {
+            $browser->withinFrame('#preferences-frame', static function ($browser) {
                 $browser->assertSelected('_archive_mbox', 'Drafts');
                 $browser->assertSelected('_archive_type', 'year');
             });
@@ -111,18 +113,18 @@ class SettingsTest extends \Tests\Browser\TestCase
      */
     public function testServerSettings()
     {
-        $this->browse(function ($browser) {
+        $this->browse(static function ($browser) {
             $browser->go('settings', 'preferences');
 
             $browser->click('#sections-table tr.server');
 
-            $browser->withinFrame('#preferences-frame', function ($browser) {
+            $browser->withinFrame('#preferences-frame', static function ($browser) {
                 if (!$browser->isPhone()) {
                     $browser->waitFor('.formbuttons button.submit');
                 }
 
                 // Main Options fieldset
-                $browser->with('form.propform fieldset.main', function ($browser) {
+                $browser->with('form.propform fieldset.main', static function ($browser) {
                     $browser->assertSeeIn('label[for=ff_read_on_archive]', 'Mark the message as read on archive')
                         ->assertCheckboxState('_read_on_archive', false)
                         ->setCheckboxState('_read_on_archive', true);
@@ -141,7 +143,7 @@ class SettingsTest extends \Tests\Browser\TestCase
             $browser->waitForMessage('confirmation', 'Successfully saved');
 
             // Verify if every option has been updated
-            $browser->withinFrame('#preferences-frame', function ($browser) {
+            $browser->withinFrame('#preferences-frame', static function ($browser) {
                 $browser->assertCheckboxState('_read_on_archive', true);
             });
         });

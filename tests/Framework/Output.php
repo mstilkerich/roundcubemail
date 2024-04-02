@@ -1,16 +1,16 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Test class to test rcube_output class
- *
- * @package Tests
  */
-class Framework_Output extends PHPUnit\Framework\TestCase
+class Framework_Output extends TestCase
 {
     /**
      * Test get_edit_field()
      */
-    function test_get_edit_field()
+    public function test_get_edit_field()
     {
         $out = rcube_output::get_edit_field('test', 'value');
 
@@ -35,7 +35,7 @@ class Framework_Output extends PHPUnit\Framework\TestCase
 
         $_POST['_test'] = 'tt';
         $attr = ['options' => ['tt' => 'oo']];
-        $out  = rcube_output::get_edit_field('test', 'value', $attr, 'select');
+        $out = rcube_output::get_edit_field('test', 'value', $attr, 'select');
 
         $this->assertSame('<select name="_test" class="ff_test">' . "\n"
             . '<option value="">---</option><option value="tt" selected="selected">oo</option></select>',
@@ -46,7 +46,7 @@ class Framework_Output extends PHPUnit\Framework\TestCase
     /**
      * Test json_serialize()
      */
-    function test_json_serialize()
+    public function test_json_serialize()
     {
         $this->assertSame('""', rcube_output::json_serialize(''));
         $this->assertSame('[]', rcube_output::json_serialize([]));

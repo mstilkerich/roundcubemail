@@ -2,17 +2,15 @@
 
 /**
  * Test class to test rcmail_action_contacts_group_create
- *
- * @package Tests
  */
 class Actions_Contacts_Group_Create extends ActionTestCase
 {
     /**
      * Test error handling
      */
-    function test_group_create_errors()
+    public function test_group_create_errors()
     {
-        $action = new rcmail_action_contacts_group_create;
+        $action = new rcmail_action_contacts_group_create();
         $output = $this->initOutput(rcmail_action::MODE_AJAX, 'contacts', 'group-create');
 
         $this->assertInstanceOf('rcmail_action', $action);
@@ -44,9 +42,9 @@ class Actions_Contacts_Group_Create extends ActionTestCase
     /**
      * Test creating a group
      */
-    function test_group_create_success()
+    public function test_group_create_success()
     {
-        $action = new rcmail_action_contacts_group_create;
+        $action = new rcmail_action_contacts_group_create();
         $output = $this->initOutput(rcmail_action::MODE_AJAX, 'contacts', 'group-create');
 
         $this->assertTrue($action->checks());
@@ -64,8 +62,8 @@ class Actions_Contacts_Group_Create extends ActionTestCase
         $this->assertTrue(strpos($result['exec'], 'this.display_message("Group created successfully.","confirmation",0);') !== false);
         $this->assertTrue(strpos($result['exec'], 'this.insert_contact_group({"source":"0","id":"2","name":"test"});') !== false);
 
-        $db     = rcmail::get_instance()->get_dbh();
-        $query  = $db->query('SELECT * FROM `contactgroups` WHERE `user_id` = 1 AND `name` = \'test\'');
+        $db = rcmail::get_instance()->get_dbh();
+        $query = $db->query('SELECT * FROM `contactgroups` WHERE `user_id` = 1 AND `name` = \'test\'');
         $result = $db->fetch_assoc($query);
 
         $this->assertTrue(!empty($result));

@@ -1,6 +1,8 @@
 <?php
 
-class ExampleAddressbook_Plugin extends PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+
+class ExampleAddressbook_Plugin extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
@@ -11,9 +13,9 @@ class ExampleAddressbook_Plugin extends PHPUnit\Framework\TestCase
     /**
      * Plugin object construction test
      */
-    function test_constructor()
+    public function test_constructor()
     {
-        $rcube  = rcube::get_instance();
+        $rcube = rcube::get_instance();
         $plugin = new example_addressbook($rcube->plugins);
 
         $this->assertInstanceOf('example_addressbook', $plugin);
@@ -25,9 +27,9 @@ class ExampleAddressbook_Plugin extends PHPUnit\Framework\TestCase
     /**
      * Test address_sources()
      */
-    function test_address_sources()
+    public function test_address_sources()
     {
-        $rcube  = rcube::get_instance();
+        $rcube = rcube::get_instance();
         $plugin = new example_addressbook($rcube->plugins);
 
         $result = $plugin->address_sources(['sources' => []]);
@@ -35,4 +37,3 @@ class ExampleAddressbook_Plugin extends PHPUnit\Framework\TestCase
         $this->assertSame('static', $result['sources']['static']['id']);
     }
 }
-

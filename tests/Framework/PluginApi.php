@@ -1,16 +1,16 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Test class to test rcube_plugin_api class
- *
- * @package Tests
  */
-class Framework_PluginApi extends PHPUnit\Framework\TestCase
+class Framework_PluginApi extends TestCase
 {
     /**
      * Test get_info()
      */
-    function test_get_info()
+    public function test_get_info()
     {
         $api = rcube_plugin_api::get_instance();
 
@@ -25,12 +25,12 @@ class Framework_PluginApi extends PHPUnit\Framework\TestCase
     /**
      * Test hooks registration, execution and unregistration
      */
-    function test_hooks()
+    public function test_hooks()
     {
         $api = rcube_plugin_api::get_instance();
 
         $var = 0;
-        $hook_handler = function($args) use (&$var) { $var++; };
+        $hook_handler = static function ($args) use (&$var) { $var++; };
 
         $api->register_hook('test', $hook_handler);
 
@@ -49,7 +49,7 @@ class Framework_PluginApi extends PHPUnit\Framework\TestCase
     /**
      * Test tasks registration
      */
-    function test_tasks()
+    public function test_tasks()
     {
         $api = rcube_plugin_api::get_instance();
 

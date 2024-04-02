@@ -3,14 +3,14 @@
 $config = [];
 
 // Database configuration
-$config['db_dsnw'] = 'sqlite:////tmp/sqlite.db?mode=0646';
+$config['db_dsnw'] = 'sqlite:///' . sys_get_temp_dir() . '/roundcube-test-sqlite.db?mode=0646';
 
 // Test user credentials
 $config['tests_username'] = 'test';
 $config['tests_password'] = 'test';
 
 // GreenMail
-$config['smtp_port'] = 25;
+$config['smtp_host'] = 'localhost:25';
 
 // Settings required by the tests
 
@@ -24,7 +24,7 @@ $config['plugins'] = [
     'archive',
     'attachment_reminder',
     'markasjunk',
-    'zipdownload'
+    'zipdownload',
 ];
 
 $config['archive_mbox'] = 'Archive';

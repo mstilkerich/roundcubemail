@@ -21,11 +21,11 @@ CREATE TABLE users (
     username varchar(128) DEFAULT '' NOT NULL,
     mail_host varchar(128) DEFAULT '' NOT NULL,
     created timestamp with time zone DEFAULT now() NOT NULL,
-    last_login timestamp with time zone DEFAULT NULL,
-    failed_login timestamp with time zone DEFAULT NULL,
-    failed_login_counter integer DEFAULT NULL,
+    last_login timestamp with time zone,
+    failed_login timestamp with time zone,
+    failed_login_counter integer,
     "language" varchar(16),
-    preferences text DEFAULT NULL,
+    preferences text,
     CONSTRAINT users_username_key UNIQUE (username, mail_host)
 );
 
@@ -228,7 +228,7 @@ CREATE TABLE "cache" (
     user_id integer NOT NULL
         REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
     cache_key varchar(128) DEFAULT '' NOT NULL,
-    expires timestamp with time zone DEFAULT NULL,
+    expires timestamp with time zone,
     data text NOT NULL,
     PRIMARY KEY (user_id, cache_key)
 );
@@ -242,7 +242,7 @@ CREATE INDEX cache_expires_idx ON "cache" (expires);
 
 CREATE TABLE "cache_shared" (
     cache_key varchar(255) NOT NULL PRIMARY KEY,
-    expires timestamp with time zone DEFAULT NULL,
+    expires timestamp with time zone,
     data text NOT NULL
 );
 
@@ -257,7 +257,7 @@ CREATE TABLE cache_index (
     user_id integer NOT NULL
         REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
     mailbox varchar(255) NOT NULL,
-    expires timestamp with time zone DEFAULT NULL,
+    expires timestamp with time zone,
     valid smallint NOT NULL DEFAULT 0,
     data text NOT NULL,
     PRIMARY KEY (user_id, mailbox)
@@ -274,7 +274,7 @@ CREATE TABLE cache_thread (
     user_id integer NOT NULL
         REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
     mailbox varchar(255) NOT NULL,
-    expires timestamp with time zone DEFAULT NULL,
+    expires timestamp with time zone,
     data text NOT NULL,
     PRIMARY KEY (user_id, mailbox)
 );
@@ -291,7 +291,7 @@ CREATE TABLE cache_messages (
         REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
     mailbox varchar(255) NOT NULL,
     uid integer NOT NULL,
-    expires timestamp with time zone DEFAULT NULL,
+    expires timestamp with time zone,
     data text NOT NULL,
     flags integer NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, mailbox, uid)
@@ -305,7 +305,7 @@ CREATE INDEX cache_messages_expires_idx ON cache_messages (expires);
 --
 
 CREATE TABLE dictionary (
-    user_id integer DEFAULT NULL
+    user_id integer
         REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
    "language" varchar(16) NOT NULL,
     data text NOT NULL,
@@ -366,6 +366,21 @@ CREATE TABLE "filestore" (
 );
 
 --
+-- Table "uploads"
+-- Name: uploads; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE "uploads" (
+    upload_id varchar(64) PRIMARY KEY,
+    session_id varchar(128) NOT NULL,
+    "group" varchar(128) NOT NULL,
+    metadata text NOT NULL,
+    created timestamp with time zone DEFAULT now() NOT NULL
+);
+
+CREATE INDEX uploads_session_id_idx ON uploads (session_id, "group", created);
+
+--
 -- Table "system"
 -- Name: system; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -375,4 +390,4 @@ CREATE TABLE "system" (
     value text
 );
 
-INSERT INTO "system" (name, value) VALUES ('roundcube-version', '2021100300');
+INSERT INTO "system" (name, value) VALUES ('roundcube-version', '2022100100');

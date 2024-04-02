@@ -2,17 +2,15 @@
 
 /**
  * Test class to test rcmail_action_settings_prefs_save
- *
- * @package Tests
  */
 class Actions_Settings_PrefsSave extends ActionTestCase
 {
     /**
      * Test run() method
      */
-    function test_run()
+    public function test_run()
     {
-        $action = new rcmail_action_settings_prefs_save;
+        $action = new rcmail_action_settings_prefs_save();
         $output = $this->initOutput(rcmail_action::MODE_HTTP, 'settings', 'save-prefs');
 
         $this->assertInstanceOf('rcmail_action', $action);
@@ -30,16 +28,16 @@ class Actions_Settings_PrefsSave extends ActionTestCase
     /**
      * Test prefs_input() method
      */
-    function test_prefs_input()
+    public function test_prefs_input()
     {
-        $action = new rcmail_action_settings_prefs_save;
+        $action = new rcmail_action_settings_prefs_save();
 
         $_POST = ['_test' => 'test'];
 
         rcmail::get_instance()->config->set('test', null);
 
-        $this->assertSame(null, $action->prefs_input('unset', '/test/'));
+        $this->assertNull($action->prefs_input('unset', '/test/'));
         $this->assertSame('test', $action->prefs_input('test', '/^test/'));
-        $this->assertSame(null, $action->prefs_input('test', '/^a/'));
+        $this->assertNull($action->prefs_input('test', '/^a/'));
     }
 }

@@ -1,6 +1,8 @@
 <?php
 
-class Markasjunk_Plugin extends PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+
+class Markasjunk_Plugin extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
@@ -10,9 +12,9 @@ class Markasjunk_Plugin extends PHPUnit\Framework\TestCase
     /**
      * Plugin object construction test
      */
-    function test_constructor()
+    public function test_constructor()
     {
-        $rcube  = rcube::get_instance();
+        $rcube = rcube::get_instance();
         $plugin = new markasjunk($rcube->plugins);
 
         $this->assertInstanceOf('markasjunk', $plugin);
@@ -22,13 +24,13 @@ class Markasjunk_Plugin extends PHPUnit\Framework\TestCase
     /**
      * Test driver loading
      */
-    function test_init_driver()
+    public function test_init_driver()
     {
-        $rcube  = rcube::get_instance();
+        $rcube = rcube::get_instance();
         $plugin = new markasjunk($rcube->plugins);
 
         $drivers = ['amavis_blacklist', 'cmd_learn', 'dir_learn', 'edit_headers', 'email_learn',
-            'jsevent', 'sa_blacklist', 'sa_detach'
+            'jsevent', 'sa_blacklist', 'sa_detach',
         ];
 
         setProperty($plugin, 'rcube', $rcube);

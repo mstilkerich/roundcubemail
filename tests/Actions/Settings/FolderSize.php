@@ -2,24 +2,22 @@
 
 /**
  * Test class to test rcmail_action_settings_folder_size
- *
- * @package Tests
  */
 class Actions_Settings_FolderSize extends ActionTestCase
 {
     /**
      * Test getting a folder size
      */
-    function test_run()
+    public function test_run()
     {
-        $action = new rcmail_action_settings_folder_size;
+        $action = new rcmail_action_settings_folder_size();
         $output = $this->initOutput(rcmail_action::MODE_AJAX, 'settings', 'folder-size');
 
         $this->assertInstanceOf('rcmail_action', $action);
         $this->assertTrue($action->checks());
 
         // Set expected storage function calls/results
-        rcmail::get_instance()->storage
+        self::mockStorage()
             ->registerFunction('folder_size', 100);
 
         $_POST = ['_mbox' => 'Test'];
@@ -36,13 +34,13 @@ class Actions_Settings_FolderSize extends ActionTestCase
     /**
      * Test handling errors
      */
-    function test_run_errors()
+    public function test_run_errors()
     {
-        $action = new rcmail_action_settings_folder_size;
+        $action = new rcmail_action_settings_folder_size();
         $output = $this->initOutput(rcmail_action::MODE_AJAX, 'settings', 'folder-size');
 
         // Set expected storage function calls/results
-        rcmail::get_instance()->storage
+        self::mockStorage()
             ->registerFunction('folder_size', false)
             ->registerFunction('get_error_code', -1)
             ->registerFunction('get_response_code', rcube_storage::READONLY);

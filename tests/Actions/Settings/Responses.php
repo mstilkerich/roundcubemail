@@ -2,17 +2,15 @@
 
 /**
  * Test class to test rcmail_action_settings_responses
- *
- * @package Tests
  */
 class Actions_Settings_Responses extends ActionTestCase
 {
     /**
      * Test run() method
      */
-    function test_run()
+    public function test_run()
     {
-        $action = new rcmail_action_settings_responses;
+        $action = new rcmail_action_settings_responses();
         $output = $this->initOutput(rcmail_action::MODE_HTTP, 'settings', 'responses');
 
         $this->assertInstanceOf('rcmail_action', $action);
@@ -26,26 +24,26 @@ class Actions_Settings_Responses extends ActionTestCase
 
         $this->assertSame('responses', $output->template);
         $this->assertSame('Responses', $output->getProperty('pagetitle'));
-        $this->assertTrue(stripos($result, "<!DOCTYPE html>") === 0);
-        $this->assertTrue(stripos($result, "<table ") !== false);
+        $this->assertTrue(stripos($result, '<!DOCTYPE html>') === 0);
+        $this->assertTrue(stripos($result, '<table ') !== false);
         $this->assertMatchesRegularExpression('/list(.min)?.js/', $result);
     }
 
     /**
      * Test responses_list() method
      */
-    function test_responses_list()
+    public function test_responses_list()
     {
         $rcmail = rcmail::get_instance();
         $rcmail->user->save_prefs([
             'compose_responses_static' => [
                 ['name' => 'static 1', 'text' => 'Static Response One'],
-            ]
+            ],
         ]);
 
         self::initDB('responses');
 
-        $action = new rcmail_action_settings_responses;
+        $action = new rcmail_action_settings_responses();
         $output = $this->initOutput(rcmail_action::MODE_HTTP, 'settings', 'responses');
 
         $result = $action->responses_list([]);

@@ -1,6 +1,8 @@
 <?php
 
-class Identicon_IdenticonEngine extends PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+
+class Identicon_IdenticonEngine extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
@@ -10,7 +12,7 @@ class Identicon_IdenticonEngine extends PHPUnit\Framework\TestCase
     /**
      * Test icon generation
      */
-    function test_icon_generation()
+    public function test_icon_generation()
     {
         if (!function_exists('imagepng')) {
             $this->markTestSkipped();
@@ -24,4 +26,3 @@ class Identicon_IdenticonEngine extends PHPUnit\Framework\TestCase
         $this->assertSame('image/png', $engine->getMimetype());
     }
 }
-

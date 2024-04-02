@@ -1,28 +1,28 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Test class to test rcube_smtp class
- *
- * @package Tests
  */
-class Framework_Smtp extends PHPUnit\Framework\TestCase
+class Framework_Smtp extends TestCase
 {
     /**
      * Class constructor
      */
-    function test_class()
+    public function test_class()
     {
-        $object = new rcube_smtp;
+        $object = new rcube_smtp();
 
-        $this->assertInstanceOf('rcube_smtp', $object, "Class constructor");
+        $this->assertInstanceOf('rcube_smtp', $object, 'Class constructor');
     }
 
     /**
      * Test preparing headers
      */
-    function test_prepare_headers()
+    public function test_prepare_headers()
     {
-        $smtp = new rcube_smtp;
+        $smtp = new rcube_smtp();
 
         $headers = [
             'Subject' => 'Test',
@@ -36,7 +36,7 @@ class Framework_Smtp extends PHPUnit\Framework\TestCase
         $this->assertCount(2, $result);
         $this->assertSame('john@domain.tld', $result[0]);
         $this->assertSame(
-            "Received: from github.com ([10.48.109.45]) by smtp.github.com (Postfix) with ESMTPA id 8C9B4E0075"
+            'Received: from github.com ([10.48.109.45]) by smtp.github.com (Postfix) with ESMTPA id 8C9B4E0075'
                 . " for <john@domain.tld>; Sat, 28 Nov 2020 22:45:44 -0800 (PST)\r\n"
                 . "Subject: Test\r\n"
                 . "From: \"John Doe\" <john@domain.tld>\r\n",
@@ -47,10 +47,10 @@ class Framework_Smtp extends PHPUnit\Framework\TestCase
     /**
      * Test parsing email address input
      */
-    function test_parse_rfc822()
+    public function test_parse_rfc822()
     {
-        $smtp   = new rcube_smtp;
-        $input  = 'test@test1.com, "test" <test@test2.pl>, "test@test3.eu" <test@test3.uk>';
+        $smtp = new rcube_smtp();
+        $input = 'test@test1.com, "test" <test@test2.pl>, "test@test3.eu" <test@test3.uk>';
         $result = invokeMethod($smtp, '_parse_rfc822', [$input]);
 
         $this->assertSame(['test@test1.com', 'test@test2.pl', 'test@test3.uk'], $result);

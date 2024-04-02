@@ -2,24 +2,22 @@
 
 /**
  * Test class to test rcmail_action_settings_folder_rename
- *
- * @package Tests
  */
 class Actions_Settings_FolderRename extends ActionTestCase
 {
     /**
      * Test renaming a folder
      */
-    function test_rename()
+    public function test_rename()
     {
-        $action = new rcmail_action_settings_folder_rename;
+        $action = new rcmail_action_settings_folder_rename();
         $output = $this->initOutput(rcmail_action::MODE_AJAX, 'settings', 'folder-rename');
 
         $this->assertInstanceOf('rcmail_action', $action);
         $this->assertTrue($action->checks());
 
         // Set expected storage function calls/results
-        rcmail::get_instance()->storage
+        self::mockStorage()
             ->registerFunction('rename_folder', true)
             ->registerFunction('folder_info', [])
             ->registerFunction('mod_folder', 'Test2');
@@ -38,13 +36,13 @@ class Actions_Settings_FolderRename extends ActionTestCase
     /**
      * Test handling errors
      */
-    function test_rename_errors()
+    public function test_rename_errors()
     {
-        $action = new rcmail_action_settings_folder_rename;
+        $action = new rcmail_action_settings_folder_rename();
         $output = $this->initOutput(rcmail_action::MODE_AJAX, 'settings', 'folder-rename');
 
         // Set expected storage function calls/results
-        rcmail::get_instance()->storage
+        self::mockStorage()
             ->registerFunction('rename_folder', false)
             ->registerFunction('get_error_code', -1)
             ->registerFunction('get_response_code', rcube_storage::READONLY);

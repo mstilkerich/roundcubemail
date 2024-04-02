@@ -1,8 +1,10 @@
 <?php
 
-class Identicon_Plugin extends PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+
+class Identicon_Plugin extends TestCase
 {
-    public static function setUpBeforeCLass(): void
+    public static function setUpBeforeClass(): void
     {
         include_once __DIR__ . '/../identicon.php';
     }
@@ -10,9 +12,9 @@ class Identicon_Plugin extends PHPUnit\Framework\TestCase
     /**
      * Plugin object construction test
      */
-    function test_constructor()
+    public function test_constructor()
     {
-        $rcube  = rcube::get_instance();
+        $rcube = rcube::get_instance();
         $plugin = new identicon($rcube->plugins);
 
         $this->assertInstanceOf('identicon', $plugin);

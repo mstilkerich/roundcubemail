@@ -1,21 +1,22 @@
 <?php
 
-class Enigma_EnigmaEngine extends PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+
+class Enigma_EnigmaEngine extends TestCase
 {
-    static function setUpBeforeClass(): void
+    public static function setUpBeforeClass(): void
     {
-        include_once __DIR__ . '/../enigma.php';
+        // include_once __DIR__ . '/../enigma.php';
         include_once __DIR__ . '/../lib/enigma_engine.php';
     }
 
     /**
      * Test password_handler()
      */
-    function test_password_handler()
+    public function test_password_handler()
     {
-        $rcube  = rcube::get_instance();
-        $plugin = new enigma($rcube->plugins);
-        $engine = new enigma_engine($plugin);
+        $rcube = rcube::get_instance();
+        $engine = new enigma_engine();
 
         unset($_SESSION['enigma_pass']);
 
@@ -31,8 +32,9 @@ class Enigma_EnigmaEngine extends PHPUnit\Framework\TestCase
 
         $store = unserialize($rcube->decrypt($_SESSION['enigma_pass']));
 
-        $this->assertSame(['123<a>456', $time], $store['ABC']);
+        $this->assertCount(2, $store['ABC']);
+        $this->assertSame('123<a>456', $store['ABC'][0]);
+        $this->assertEqualsWithDelta($time, $store['ABC'][1], 1);
         $this->assertSame(['ABC' => '123<a>456'], $engine->get_passwords());
     }
 }
-

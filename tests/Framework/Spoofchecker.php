@@ -1,16 +1,16 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Test class to test rcube_spoofchecker class
- *
- * @package Tests
  */
-class Framework_Spoofchecker extends PHPUnit\Framework\TestCase
+class Framework_Spoofchecker extends TestCase
 {
     /**
      * Test data for test_check()
      */
-    function data_check()
+    public static function provide_check_cases(): iterable
     {
         return [
             // Valid:
@@ -32,9 +32,9 @@ class Framework_Spoofchecker extends PHPUnit\Framework\TestCase
     }
 
     /**
-     * @dataProvider data_check
+     * @dataProvider provide_check_cases
      */
-    function test_check($email, $expected)
+    public function test_check($email, $expected)
     {
         $this->assertSame($expected, rcube_spoofchecker::check($email));
     }

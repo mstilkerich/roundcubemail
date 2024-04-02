@@ -2,6 +2,218 @@
 
 ## Unreleased
 
+- Update to jQuery 3.7.1
+- Drop dependency on JsTimeZoneDetect (#8965)
+- Removed support for MS SQL Server and Oracle (#7854)
+- Store uploads metadata in a separate sql database table instead of a session (#8415)
+- Mouse-over menu on messages list (#7141)
+- Advanced mail search syntax with more possibilities (without UI) (#8502)
+- Added an option for a default mail search scope (#9077, #7556)
+- Added option to define font list and font-size list for HTML editor - available_fonts/available_font_sizes (#5700)
+- Support for HAproxy protocol header in IMAP connections (#8625)
+- Change 'smtp_log' option default value to False
+- Delete messages directly from Junk on folder purge if delete_junk is enabled (#8766)
+- Set timeout=30, connect_timeout=5, read_timeout=120 as defaults for HTTP client (#8865)
+- Remove use of utf8_encode() and utf8_decode() functions deprecated in PHP 8.2
+- Support PHP Zip extension and 7z in install-jsdeps.sh (#8935)
+- Add identities management script - bin/identity.sh (#8887)
+- Prefer 8bit over quoted-printable for HTML parts, when force_7bit is disabled (#8477)
+- Convert images in HTML content pasted into HTML editor to `data:` URIs (and later to attachments) (#6938)
+- Add possibility to change ATTR_EMULATE_PREPARES via config file (#9213)
+- OAuth: Add support for SMTP without authentication (#9183)
+- OAuth: Add support for OAuth/OpenIDC discovery (#8201)
+- OAuth: Add support for invalidating the OAuth-session on logout (#8057)
+- OAuth: Add support for OpenID Connect RP-Initiated Logout (#9109)
+- OAuth: Add support for OpenID Connect Back-Channel Logout (#9110)
+- OAuth: Add support for PKCE (#8757)
+- OAuth: Add support for OAUTHBEARER (#9217)
+- OAuth: Add `oauth_debug` option (#9217)
+- OAuth: Fix: missing config `oauth_provider_name` in rcmail_oauth's constructor (#9217)
+- OAuth: Fix Bearer authentication for Kinde (#9244)
+- OAuth: Refactor: move display to the rcmail_oauth class and use `loginform_content` hook (#9217)
+- Additional_Message_Headers: Added %u, %d and %l variables (#8746, #8732)
+- ACL: Set default of 'acl_specials' option to ['anyone'] (#8911)
+- Enigma: Support Kolab's Web Of Anti-Trust feature (#8626)
+- Managesieve: Support :encodeurl (RFC 5435) (#8917)
+- Managesieve: Add List-ID to the list of headers for creating new sieve-filters (#8307)
+- Password: Add ldap_samba_ad driver (#8525)
+- Password: Allow LDAP access using LDAP URI and SASL binding (#8402)
+- Fix attachment name decoding when 'charset' parameter exists in the headers (#9376)
+- Fix deprecated (in PHP 8.4) use of session_set_save_handler() (#9060)
+- Fix potential HTTP protocol version mismatch (#8982)
+- Makefile: Use phpDocumentor v3.4 for the Framework docs (#9313)
+- Fix bug where HTML entities in URLs were not decoded on HTML to plain text conversion (#9312)
+- Fix bug in collapsing/expanding folders with some special characters in names (#9324)
+- Fix PHP8 warnings (#9363)
+- Fix missing field labels in CSV import, for some locales (#9393)
+
+## Release 1.6.6
+
+- Fix regression in handling LDAP search_fields configuration parameter (#9210)
+- Enigma: Fix finding of a private key when decrypting a message using GnuPG v2.3
+- Fix page jump menu flickering on click (#9196)
+- Update to TinyMCE 5.10.9 security release (#9228)
+- Fix PHP8 warnings (#9235, #9238, #9242, #9306)
+- Fix saving other encryption settings besides enigma's (#9240)
+- Fix unneeded php command use in installto.sh and deluser.sh scripts (#9237)
+- Fix TinyMCE localization installation (#9266)
+- Fix bug where trailing non-ascii characters in email addresses could have been removed in recipient input (#9257)
+- Fix IMAP GETMETADATA command with options - RFC5464
+
+## Release 1.6.5
+
+- Fix PHP8 fatal error when parsing a malformed BODYSTRUCTURE (#9171)
+- Fix duplicated Inbox folder on IMAP servers that do not use Inbox folder with all capital letters (#9166)
+- Fix PHP warnings (#9174)
+- Fix UI issue when dealing with an invalid managesieve_default_headers value (#9175)
+- Fix bug where images attached to application/smil messages weren't displayed (#8870)
+- Fix PHP string replacement error in utils/error.php (#9185)
+- Fix regression where `smtp_user` did not allow pre/post strings before/after `%u` placeholder (#9162)
+- Fix cross-site scripting (XSS) vulnerability in setting Content-Type/Content-Disposition for attachment preview/download
+
+## Release 1.6.4
+
+- Fix PHP8 warnings (#9142, #9160)
+- Fix default 'mime.types' path on Windows (#9113)
+- Managesieve: Fix javascript error when relational or spamtest extension is not enabled (#9139)
+- Fix cross-site scripting (XSS) vulnerability in handling of SVG in HTML messages [CVE-2023-5631] (#9168)
+
+## Release 1.6.3
+
+- Fix bug where installto.sh/update.sh scripts were removing some essential options from the config file (#9051)
+- Update jQuery-UI to version 1.13.2 (#9041)
+- Fix regression that broke use_secure_urls feature (#9052)
+- Fix potential PHP fatal error when opening a message with message/rfc822 part (#8953)
+- Fix bug where a duplicate `<title>` tag in HTML email could cause some parts being cut off (#9029)
+- Fix bug where a list of folders could have been sorted incorrectly (#9057)
+- Fix regression where LDAP addressbook 'filter' option was ignored (#9061)
+- Fix wrong order of a multi-folder search result when sorting by size (#9065)
+- Fix so install/update scripts do not require PEAR (#9037)
+- Fix regression where some mail parts could have been decoded incorrectly, or not at all (#9096)
+- Fix handling of an error case in Cyrus IMAP BINARY FETCH, fallback to non-binary FETCH (#9097)
+- Fix PHP8 deprecation warning in the reconnect plugin (#9083)
+- Fix "Show source" on mobile with x_frame_options = deny (#9084)
+- Fix various PHP warnings (#9098)
+- Fix deprecated use of ldap_connect() in password's ldap_simple driver (#9060)
+- Fix cross-site scripting (XSS) vulnerability in handling of linkrefs in plain text messages [CVE-2023-43770]
+
+## Release 1.6.2
+
+- Add Uyghur localization
+- Fix regression in OAuth request URI caused by use of REQUEST_URI instead of SCRIPT_NAME as a default (#8878)
+- Fix bug where false attachment reminder was displayed on HTML mail with inline images (#8885)
+- Fix bug where a non-ASCII character in app.js could cause error in javascript engine (#8894)
+- Fix JWT decoding with url safe base64 schema (#8890)
+- Fix bug where .wav instead of .mp3 file was used for the new mail notification in Firefox (#8895)
+- Fix PHP8 warning (#8891)
+- Fix support for Windows-31J charset (#8869)
+- Fix so LDAP VLV option is disabled by default as documented (#8833)
+- Fix so an email address with name is supported as input to the managesieve notify :from parameter (#8918)
+- Fix Help plugin menu (#8898)
+- Fix invalid onclick handler on the logo image when using non-array skin_logo setting (#8933)
+- Fix duplicate recipients in "To" and "Cc" on reply (#8912)
+- Fix bug where it wasn't possible to scroll lists by clicking middle mouse button (#8942)
+- Fix bug where label text in a single-input dialog could be partially invisible in some locales (#8905)
+- Fix bug where LDAP (fulltext) search didn't work without 'search_fields' in config (#8874)
+- Fix extra leading newlines in plain text converted from HTML (#8973)
+- Fix so recipients with a domain ending with .s are allowed (#8854)
+- Fix so vCard output does not contain non-standard/redundant TYPE=OTHER and TYPE=INTERNET (#8838)
+- Fix QR code images for contacts with non-ASCII characters (#9001)
+- Fix PHP8 warnings when using list_flags and list_cols properties by plugins (#8998)
+- Fix bug where subfolders could loose subscription on parent folder rename (#8892)
+- Fix connecting to LDAP using an URI with ldapi:// scheme (#8990)
+- Fix insecure shell command params handling in cmd_learn driver of markasjunk plugin (#9005)
+- Fix bug where some mail headers didn't work in cmd_learn driver of markasjunk plugin (#9005)
+- Fix PHP fatal error when importing vcf file using PHP 8.2 (#9025)
+- Fix so output of log_date_format with microseconds contains time in server time zone, not UTC
+
+## Release 1.6.1
+
+- Kill session if refreshing oauth token fails (#8734)
+- Fix various PHP 8.1 warnings (#8628, #8644, #8667, #8656, #8647)
+- Password: Remove references to %c variable that has been removed before (#8633)
+- Fix anchor links in HTML mail (#8632)
+- Fix bug where config creation in Installer did ignore options in the form (#8634)
+- Fix bug where renamed options were removed from the config on installto.sh (update.sh) run (#8643)
+- Fix favicon rewrite rule in .htaccess (#8654)
+- Fix various PHP 8.2 warnings
+- Fix bug where it wasn't possible to create more than one response record on SQLite and Postgres (#8664)
+- Fix support for ManageSieve over implicit SSL (#8670)
+- Fix bug where "about:blank" page could trigger "load error" (#8554)
+- Fix bug where setting 'Clear Trash on Logout' to 'all messages' didn't work (#8687)
+- Fix bug where the attachment menu wouldn't disappear after an action is selected (#8691)
+- Fix bug where some dialogs in an eml attachment preview would not close on mobile (#8627)
+- Fix bug where multiline data:image URI's in emails were stripped from the message on display (#8613)
+- Fix fatal error on identity page if Enigma plugin is misconfigured (#8719)
+- Fix so N property always exists in a vCard export (#8771)
+- Fix authenticating to Courier IMAP with passwords containing a '~' character (#8772)
+- Fix handling of smtp/imap port options on configuration file update (#8756)
+- Fix bug where array values could not be saved in utils/save_pref action (#8781)
+- Add workaround for using Roundcube behind a reverse proxy with a subpath: 'request_path' option (#8738, #8770)
+- Fix bug where "Invalid skin name" error was logged on preferences save if there's only one skin (#8825)
+- Fix SIGBUS raised in ImageMagick when more than one process tried to generate a thumbnail of the same image attachment (#8511)
+- Fix bug where updater does not update the vendor packages (#8642)
+- Fix missing mail composing textarea on reply/draft with a long plain text content (#8866)
+
+## Release 1.6.0
+
+- Fix SMTP XCLIENT extension when not using STARTTLS (#8581)
+- Fix call to undefined method rcube_ldap_generic::option_set() (#8564)
+- Fix PHP Fatal error on incompatible method declaration of rcmail_output_json::command() and rcmail_output::command() (#8579)
+- Fix support for DSN specification without host e.g. pgsql:///dbname (#8558)
+- Fix TinyMCE configuration for handling styles of pasted content in webkit browsers (#8555)
+- Fix bug where some checkboxes could be selected unintentinally (#8565)
+- Fix css styles of the email recipient element while dragging (#8580)
+- Fix PHP 8.1 warnings in the LDAP backend code (#8572)
+- Fix various PHP 8.1 warnings (#8584)
+- Fix bug where a recipient address containing UTF-8 characters was ignored when sending an email (#8493, #8546)
+- Fix so rcmail::contact_exists() works with IDNA addresses (#8545)
+- Fix password option in `storage_init` hook after refreshing oauth access token (#8436)
+- Fix attachment Options popover menu after attachment delete (#8602)
+- Fix so "Found unconstructed Spoofchecker" error is not fatal (#8537)
+
+## Release 1.6-rc
+
+- Update to jQuery-UI 1.13.1 (#8455)
+- Added possibility to make the logo image a link via the 'skin_logo' option (#8501)
+- Use navigator.pdfViewerEnabled for PDF viewer detection
+- Remove use of unreliable charset detection (#8344)
+- Don't list images attached to multipart/related part as attachments (#7184)
+- Password: Add support for ssha256 algorithm (#8459)
+- Fix so unix:// URI is supported in various host spec. options again (#8468)
+- Fix slow loading of long HTML content into the HTML editor (#8108)
+- Fix bug where SMTP password didn't work if it contained '%p' (#8435)
+- Enigma: Fix initial synchronization of private keys
+- Enigma: Fix double quoted-printable encoding of pgp-signed messages with no attachments (#8413)
+- Fix handling of message/rfc822 parts that are small and are multipart structures with a single part (#8458)
+- Fix bug where session could time out if DB and PHP timezone were different (#8303)
+- Fix bug where DSN flag state wasn't stored with a draft (#8371)
+- Fix broken encoding of HTML content encapsulated in a RTF attachment (#8444)
+- Fix problem with aria-hidden=true on toolbar menus in the Elastic skin (#8517)
+- Fix so links (e.g. www.some.page or http://some.page) are not considered mispellings (#8527)
+- Fix bug where title tag content was displayed in the body if it contained HTML tags (#8540)
+
+## Release 1.6-beta
+
+- Unified and simplified services connection options (#8310):
+    1. IMAP:
+        - renamed `default_host` to `imap_host`
+        - removed `default_port` option (non-standard port can be set via `imap_host`)
+        - set "localhost:143" as a default for `imap_host`
+    2. SMTP:
+        - renamed `smtp_server` to `smtp_host`
+        - removed `smtp_port` option (non-standard port can be set via `smtp_host`)
+        - set "localhost:587" as a default for `smtp_host`
+    3. LDAP:
+        - removed `port` option from `ldap_public` array (non-standard port can be set via `host`)
+        - removed `use_tls` option from `ldap_public` array (use tls:// prefix in `host`)
+    4. Managesieve:
+        - removed `managesieve_port` option (non-standard port can be set via `managesieve_host`)
+        - removed `managesieve_usetls` option (tls:// prefix in `managesieve_host` have to be used)
+- Plugin API: Removed `smtp_port` parameter in `smtp_connect` hook
+- Plugin API: Renamed `smtp_server` parameter to `smtp_host` in `smtp_connect` hook
+- Plugin API: Removed `port` parameter in `managesieve_connect` hook
+- Plugin API: Removed `usetls` parameter in `managesieve_connect` hook
 - Added support for PHP 8.1 (#8151)
 - Dropped support for PHP < 7.3 (#7976)
 - Dropped support for strftime-like format (with % sign) in date and time format configuration
@@ -14,16 +226,16 @@
 - Add option to purge deleted mails older than 30, 60 or 90 days (#5493)
 - Add ability to mark multiple messages as not deleted at once (#5133)
 - Add possibility to disable line-wrapping of sent mail body (#5101)
-- Improve auto-wrapping of plain text messages on preview and reply, don't wrap non-format=flowed content (#6974)
+- Improve/Fix wrapping of plain text messages on preview and reply (#6974, #8391, #8378, #8289)
 - Improve searching by sender/recipient headers, support Reply-To and Followup-To (#6582)
 - Add option to control links handling behavior on html to text conversion (#6485)
 - Add 'loginform_content' plugin hook (#8273, #6569)
-- OAuth: pass 'id_token' to 'oauth_login' plugin hook (#8214)
-- OAuth: fix expiration of short-lived oauth tokens (#8147)
-- OAuth: fix relative path to assets if /index.php/foo/bar url is used (#8144)
 - SMTP: If requested use TLS also without authentication (#4590, #8111)
 - Display a generic error page on initial DB/configuration errors (#8222)
 - Display telephone numbers as tel: links (#8240)
+- Elastic: Move scrollbar settings to variables (#8352)
+- Elastic: Use thin scrollbars in both light and dark mode
+- Elastic: Make the scrollbar color lighter in dark mode (#8345)
 - Autologout: A new plugin to auto log out users with a POST request (#8270)
 - Enigma: Upgrade to OpenPGP.js v5.0
 - Identicon: Make background color of the image to match the current skin colors (#8256)
@@ -38,9 +250,30 @@
 - Fix compatibility with Referrer-Policy: "strict-origin" (#8170)
 - Fix locked SQLite database for the CLI tools (#8035)
 - Fix Makefile on Linux (#8211)
+- Fix so PHP warnings are ignored when resizing a malformed image attachment (#8387)
+- Fix various PHP8 warnings (#8392, #9193)
+- Fix mail headers injection via the subject field on mail compose (#8404)
+- Fix bug where small message/rfc822 parts could not be decoded (#8408)
+- Fix setting HTML mode on reply/forward of a signed message (#8405)
+- Fix handling of RFC2231-encoded attachment names inside of a message/rfc822 part (#8418)
+- Fix bug where some mail parts (images) could have not be listed as attachments (#8425)
+- Fix bug where attachment icons were stuck at the top of the messages list in Safari (#8433)
+
+## Release 1.5.2
+
+- OAuth: pass 'id_token' to 'oauth_login' plugin hook (#8214)
+- OAuth: fix expiration of short-lived oauth tokens (#8147)
+- OAuth: fix relative path to assets if /index.php/foo/bar url is used (#8144)
+- OAuth: no auto-redirect on imap login failures (#8370)
+- OAuth: refresh access token in 'refresh' plugin hook (#8224)
 - Fix so folder search parameters are honored by subscriptions_option plugin (#8312)
 - Fix password change with Directadmin driver (#8322, #8329)
 - Fix so css files in plugins/jqueryui/themes will be minified too (#8337)
+- Fix handling of unicode/special characters in custom From input (#8357)
+- Fix some PHP8 compatibility issues (#8363)
+- Fix chpass-wrapper.py helper compatibility with Python 3 (#8324)
+- Fix scrolling and missing Close button in the Select image dialog in Elastic/mobile (#8367)
+- Security: Fix cross-site scripting (XSS) via HTML messages with malicious CSS content
 
 ## Release 1.5.1
 

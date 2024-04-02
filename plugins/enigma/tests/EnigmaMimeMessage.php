@@ -1,8 +1,10 @@
 <?php
 
-class Enigma_EnigmaMimeMessage extends PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+
+class Enigma_EnigmaMimeMessage extends TestCase
 {
-    static function setUpBeforeClass(): void
+    public static function setUpBeforeClass(): void
     {
         include_once __DIR__ . '/../lib/enigma_mime_message.php';
     }
@@ -10,32 +12,32 @@ class Enigma_EnigmaMimeMessage extends PHPUnit\Framework\TestCase
     /**
      * Test isMultipart()
      */
-    function test_is_multipart()
+    public function test_is_multipart()
     {
-        $mime     = new Mail_mime();
+        $mime = new Mail_mime();
         $message1 = new enigma_mime_message($mime, enigma_mime_message::PGP_SIGNED);
 
-        $this->assertSame(false, $message1->isMultipart());
+        $this->assertFalse($message1->isMultipart());
 
         $mime->setHTMLBody('<html></html>');
         $message = new enigma_mime_message($mime, enigma_mime_message::PGP_SIGNED);
 
-        $this->assertSame(true, $message->isMultipart());
+        $this->assertTrue($message->isMultipart());
 
         $message = new enigma_mime_message($message1, enigma_mime_message::PGP_SIGNED);
 
-        $this->assertSame(true, $message->isMultipart());
+        $this->assertTrue($message->isMultipart());
     }
 
     /**
      * Test getFromAddress()
      */
-    function test_get_from_address()
+    public function test_get_from_address()
     {
-        $mime    = new Mail_mime();
+        $mime = new Mail_mime();
         $message = new enigma_mime_message($mime, enigma_mime_message::PGP_SIGNED);
 
-        $this->assertSame(null, $message->getFromAddress());
+        $this->assertNull($message->getFromAddress());
 
         $mime->setFrom('test@domain.com');
         $message = new enigma_mime_message($mime, enigma_mime_message::PGP_SIGNED);
@@ -46,7 +48,7 @@ class Enigma_EnigmaMimeMessage extends PHPUnit\Framework\TestCase
     /**
      * Test getRecipients()
      */
-    function test_get_recipients()
+    public function test_get_recipients()
     {
         $mime = new Mail_mime();
         $mime->setFrom('test1@domain.com');
@@ -64,7 +66,7 @@ class Enigma_EnigmaMimeMessage extends PHPUnit\Framework\TestCase
     /**
      * Test getOrigBody()
      */
-    function test_get_orig_body()
+    public function test_get_orig_body()
     {
         $mime = new Mail_mime();
         $mime->setTXTBody('test body');
@@ -81,7 +83,7 @@ class Enigma_EnigmaMimeMessage extends PHPUnit\Framework\TestCase
     /**
      * Test get()
      */
-    function test_get()
+    public function test_get()
     {
         $mime = new Mail_mime();
         $mime->setTXTBody('test body');
@@ -89,7 +91,7 @@ class Enigma_EnigmaMimeMessage extends PHPUnit\Framework\TestCase
         $message = new enigma_mime_message($mime, enigma_mime_message::PGP_SIGNED);
 
         $expected = "This is an OpenPGP/MIME signed message (RFC 4880 and 3156)\r\n"
-            ."\r\n"
+            . "\r\n"
             . "--=_%x\r\n"
             . "Content-Transfer-Encoding: quoted-printable\r\n"
             . "Content-Type: text/plain; charset=ISO-8859-1\r\n"
@@ -120,7 +122,7 @@ class Enigma_EnigmaMimeMessage extends PHPUnit\Framework\TestCase
         $message->addPGPSignature('signature', 'algorithm');
 
         $signed = "This is an OpenPGP/MIME signed message (RFC 4880 and 3156)\r\n"
-            ."\r\n"
+            . "\r\n"
             . "--=_%x\r\n"
             . "Content-Transfer-Encoding: quoted-printable\r\n"
             . "Content-Type: text/plain; charset=ISO-8859-1\r\n"
@@ -161,7 +163,7 @@ class Enigma_EnigmaMimeMessage extends PHPUnit\Framework\TestCase
         $message->setPGPEncryptedBody('encrypted body');
 
         $encrypted = "This is an OpenPGP/MIME encrypted message (RFC 4880 and 3156)\r\n"
-            ."\r\n"
+            . "\r\n"
             . "--=_%x\r\n"
             . "Content-Type: application/pgp-encrypted\r\n"
             . "Content-Description: PGP/MIME version identification\r\n"

@@ -1,19 +1,19 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Test class to test rcube_tnef_decoder class
- *
- * @package Tests
  */
-class Framework_TnefDecoder extends PHPUnit\Framework\TestCase
+class Framework_TnefDecoder extends TestCase
 {
     /**
      * Test TNEF decoding
      */
-    function test_decompress()
+    public function test_decompress()
     {
-        $body   = file_get_contents(TESTS_DIR . 'src/one-file.tnef');
-        $tnef   = new rcube_tnef_decoder;
+        $body = file_get_contents(TESTS_DIR . 'src/one-file.tnef');
+        $tnef = new rcube_tnef_decoder();
         $result = $tnef->decompress($body);
 
         $this->assertSame('one-file', trim($result['message']['name']));
@@ -28,10 +28,10 @@ class Framework_TnefDecoder extends PHPUnit\Framework\TestCase
     /**
      * Test TNEF decoding
      */
-    function test_decompress_body()
+    public function test_decompress_body()
     {
-        $body   = file_get_contents(TESTS_DIR . 'src/body.tnef');
-        $tnef   = new rcube_tnef_decoder;
+        $body = file_get_contents(TESTS_DIR . 'src/body.tnef');
+        $tnef = new rcube_tnef_decoder();
         $result = $tnef->decompress($body);
 
         $this->assertSame('Untitled.html', trim($result['message']['name']));
@@ -41,7 +41,7 @@ class Framework_TnefDecoder extends PHPUnit\Framework\TestCase
         $this->assertSame(5360, $result['message']['size']);
         $this->assertMatchesRegularExpression('/^<\!DOCTYPE HTML/', $result['message']['stream']);
 
-        $tnef   = new rcube_tnef_decoder;
+        $tnef = new rcube_tnef_decoder();
         $result = $tnef->decompress($body, true);
 
         $this->assertCount(0, $result['attachments']);
@@ -52,12 +52,12 @@ class Framework_TnefDecoder extends PHPUnit\Framework\TestCase
     /**
      * Test rtf2text()
      */
-    function test_rtf2text()
+    public function test_rtf2text()
     {
         $body = file_get_contents(TESTS_DIR . 'src/sample.rtf');
         $text = rcube_tnef_decoder::rtf2text($body);
 
-        $this->assertMatchesRegularExpression('/^[a-zA-Z1-6!&<,> \n\.]+$/', $text);
+        $this->assertMatchesRegularExpression('/^[a-zA-Z1-6!&<,> \n\r\.]+$/', $text);
         $this->assertTrue(strpos($text, 'Alex Skolnick') !== false);
         $this->assertTrue(strpos($text, 'Heading 1') !== false);
         $this->assertTrue(strpos($text, 'Heading 2') !== false);

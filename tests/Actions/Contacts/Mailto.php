@@ -2,17 +2,15 @@
 
 /**
  * Test class to test rcmail_action_contacts_mailto
- *
- * @package Tests
  */
 class Actions_Contacts_Mailto extends ActionTestCase
 {
     /**
      * Test run() method
      */
-    function test_run()
+    public function test_run()
     {
-        $action = new rcmail_action_contacts_mailto;
+        $action = new rcmail_action_contacts_mailto();
         $output = $this->initOutput(rcmail_action::MODE_AJAX, 'contacts', 'mailto');
 
         $this->assertInstanceOf('rcmail_action', $action);
@@ -20,10 +18,10 @@ class Actions_Contacts_Mailto extends ActionTestCase
 
         self::initDB('contacts');
 
-        $db     = rcmail::get_instance()->get_dbh();
-        $query  = $db->query('SELECT `contact_id` FROM `contacts` WHERE `email` = ?', 'johndoe@example.org');
+        $db = rcmail::get_instance()->get_dbh();
+        $query = $db->query('SELECT `contact_id` FROM `contacts` WHERE `email` = ?', 'johndoe@example.org');
         $result = $db->fetch_assoc($query);
-        $cid    = $result['contact_id'];
+        $cid = $result['contact_id'];
 
         $_POST = ['_cid' => $cid, '_source' => '0'];
 

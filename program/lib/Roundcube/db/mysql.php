@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  +-----------------------------------------------------------------------+
  | This file is part of the Roundcube Webmail client                     |
  |                                                                       |
@@ -22,17 +22,11 @@
  * Database independent query interface
  *
  * This is a wrapper for the PHP PDO
- *
- * @package    Framework
- * @subpackage Database
  */
 class rcube_db_mysql extends rcube_db
 {
     public $db_provider = 'mysql';
 
-    /**
-     * {@inheritdoc}
-     */
     public function __construct($db_dsnw, $db_dsnr = '', $pconn = false)
     {
         parent::__construct($db_dsnw, $db_dsnr, $pconn);
@@ -45,13 +39,11 @@ class rcube_db_mysql extends rcube_db
     /**
      * Abstract SQL statement for value concatenation
      *
-     * @return string SQL statement to be used in query
+     * @return string ...$args Values to concatenate
      */
-    public function concat(/* col1, col2, ... */)
+    public function concat(...$args)
     {
-        $args = func_get_args();
-
-        if (!empty($args) && is_array($args[0])) {
+        if (count($args) == 1 && is_array($args[0])) {
             $args = $args[0];
         }
 
@@ -68,7 +60,6 @@ class rcube_db_mysql extends rcube_db
     protected function dsn_string($dsn)
     {
         $params = [];
-        $result = 'mysql:';
 
         if (isset($dsn['database'])) {
             $params[] = 'dbname=' . $dsn['database'];
@@ -88,11 +79,7 @@ class rcube_db_mysql extends rcube_db
 
         $params[] = 'charset=' . (!empty($dsn['charset']) ? $dsn['charset'] : 'utf8mb4');
 
-        if (!empty($params)) {
-            $result .= implode(';', $params);
-        }
-
-        return $result;
+        return 'mysql:' . implode(';', $params);
     }
 
     /**
@@ -137,7 +124,11 @@ class rcube_db_mysql extends rcube_db
         $result[PDO::ATTR_AUTOCOMMIT] = true;
 
         // Disable emulating of prepared statements
-        $result[PDO::ATTR_EMULATE_PREPARES] = false;
+        if (isset($dsn['emulate_prepares'])) {
+            $result[PDO::ATTR_EMULATE_PREPARES] = rcube_utils::get_boolean($dsn['emulate_prepares']);
+        } else {
+            $result[PDO::ATTR_EMULATE_PREPARES] = false;
+        }
 
         return $result;
     }
@@ -151,9 +142,9 @@ class rcube_db_mysql extends rcube_db
     {
         // get tables if not cached
         if ($this->tables === null) {
-            $q = $this->query("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES"
+            $q = $this->query('SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES'
                 . " WHERE TABLE_SCHEMA = ? AND TABLE_TYPE = 'BASE TABLE'"
-                . " ORDER BY TABLE_NAME", $this->db_dsnw_array['database']);
+                . ' ORDER BY TABLE_NAME', $this->db_dsnw_array['database']);
 
             $this->tables = $q ? $q->fetchAll(PDO::FETCH_COLUMN, 0) : [];
         }
@@ -170,8 +161,8 @@ class rcube_db_mysql extends rcube_db
      */
     public function list_cols($table)
     {
-        $q = $this->query("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS"
-            . " WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?",
+        $q = $this->query('SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS'
+            . ' WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?',
             $this->db_dsnw_array['database'], $table);
 
         if ($q) {
@@ -230,18 +221,27 @@ class rcube_db_mysql extends rcube_db
      *                        should be the same as in $columns)
      *
      * @return PDOStatement|bool Query handle or False on error
+     *
      * @todo Multi-insert support
      */
     public function insert_or_update($table, $keys, $columns, $values)
     {
-        $columns = array_map(function($i) { return "`$i`"; }, $columns);
-        $cols    = implode(', ', array_map(function($i) { return "`$i`"; }, array_keys($keys)));
-        $cols   .= ', ' . implode(', ', $columns);
-        $vals    = implode(', ', array_map(function($i) { return $this->quote($i); }, $keys));
-        $vals   .= ', ' . rtrim(str_repeat('?, ', count($columns)), ', ');
-        $update  = implode(', ', array_map(function($i) { return "$i = VALUES($i)"; }, $columns));
+        $columns = array_map(static function ($i) {
+            return "`{$i}`";
+        }, $columns);
+        $cols = implode(', ', array_map(static function ($i) {
+            return "`{$i}`";
+        }, array_keys($keys)));
+        $cols .= ', ' . implode(', ', $columns);
+        $vals = implode(', ', array_map(function ($i) {
+            return $this->quote($i);
+        }, $keys));
+        $vals .= ', ' . rtrim(str_repeat('?, ', count($columns)), ', ');
+        $update = implode(', ', array_map(static function ($i) {
+            return "{$i} = VALUES({$i})";
+        }, $columns));
 
-        return $this->query("INSERT INTO $table ($cols) VALUES ($vals)"
-            . " ON DUPLICATE KEY UPDATE $update", $values);
+        return $this->query("INSERT INTO {$table} ({$cols}) VALUES ({$vals})"
+            . " ON DUPLICATE KEY UPDATE {$update}", $values);
     }
 }

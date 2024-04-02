@@ -1,27 +1,26 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Test class to test rcube class
- *
- * @package Tests
  */
-class Framework_Rcube extends PHPUnit\Framework\TestCase
+class Framework_Rcube extends TestCase
 {
-
     /**
      * Class constructor
      */
-    function test_class()
+    public function test_class()
     {
         $object = rcube::get_instance();
 
-        $this->assertInstanceOf('rcube', $object, "Class singleton");
+        $this->assertInstanceOf('rcube', $object, 'Class singleton');
     }
 
     /**
      * rcube::read_localization()
      */
-    function test_read_localization()
+    public function test_read_localization()
     {
         $rcube = rcube::get_instance();
         $result = $rcube->read_localization(INSTALL_PATH . 'plugins/acl/localization', 'pl_PL');
@@ -32,7 +31,7 @@ class Framework_Rcube extends PHPUnit\Framework\TestCase
     /**
      * rcube::list_languages()
      */
-    function test_list_languages()
+    public function test_list_languages()
     {
         $rcube = rcube::get_instance();
         $result = $rcube->list_languages();
@@ -43,24 +42,40 @@ class Framework_Rcube extends PHPUnit\Framework\TestCase
     /**
      * rcube::encrypt() and rcube::decrypt()
      */
-    function test_encrypt_and_decrypt()
+    public function test_encrypt_and_decrypt()
     {
         $rcube = rcube::get_instance();
+
         $result = $rcube->decrypt($rcube->encrypt('test'));
-
         $this->assertSame('test', $result);
-
-        // The following tests fail quite often, therefore we disable them
-        $this->markTestSkipped();
 
         // Test AEAD cipher method
+        $defaultCipherMethod = $rcube->config->get('cipher_method');
         $rcube->config->set('cipher_method', 'aes-256-gcm');
+        try {
+            $result = $rcube->decrypt($rcube->encrypt('test'));
+            $this->assertSame('test', $result);
+        } finally {
+            $rcube->config->set('cipher_method', $defaultCipherMethod);
+        }
+    }
 
-        $result = $rcube->decrypt($rcube->encrypt('test'));
+    /**
+     * rcube::exec()
+     *
+     * @requires function shell_exec
+     */
+    public function test_exec()
+    {
+        if (\PHP_OS_FAMILY === 'Windows') {
+            $this->assertSame('', rcube::exec('where.exe unknown-command-123 2> nul'));
+            $this->assertSame('12', rcube::exec('set /a 10 + {v}', ['v' => '2']));
 
-        $this->assertSame('test', $result);
+            return;
+        }
 
-        // Back to the default
-        $rcube->config->set('cipher_method', 'DES-EDE3-CBC');
+        $this->assertSame('', rcube::exec('which unknown-command-123'));
+        $this->assertSame("2038\n", rcube::exec('date --date={date} +%Y', ['date' => '@2147483647']));
+        // TODO: More cases
     }
 }

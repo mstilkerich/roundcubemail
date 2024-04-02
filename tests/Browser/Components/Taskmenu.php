@@ -2,8 +2,8 @@
 
 namespace Tests\Browser\Components;
 
-use Tests\Browser\Browser;
 use Laravel\Dusk\Component;
+use Tests\Browser\Browser;
 
 class Taskmenu extends Component
 {
@@ -23,15 +23,12 @@ class Taskmenu extends Component
      * Assert that the browser page contains the component.
      *
      * @param Browser $browser
-     *
-     * @return void
      */
-    public function assert($browser)
+    public function assert($browser): void
     {
         if ($browser->isPhone()) {
             $browser->assertPresent($this->selector());
-        }
-        else {
+        } else {
             $browser->assertVisible($this->selector());
         }
     }
@@ -61,14 +58,14 @@ class Taskmenu extends Component
         }
 
         foreach ($this->options as $option) {
-            $browser->assertVisible("a.{$option}:not(.disabled)" . ($selected == $option ? ".selected" : ":not(.selected)"));
+            $browser->assertVisible("a.{$option}:not(.disabled)" . ($selected == $option ? '.selected' : ':not(.selected)'));
         }
 
         // hide the menu back
         if ($browser->isPhone()) {
             $browser->withinBody(function ($browser) {
                 $browser->click('.popover a.button.cancel');
-                $browser->waitUntilMissing($this->selector());
+                $browser->waitUntilMissingOrStale($this->selector());
             });
         }
     }
@@ -79,7 +76,7 @@ class Taskmenu extends Component
     public function clickMenuItem(Browser $browser, $name)
     {
         if ($browser->isPhone()) {
-            $browser->withinBody(function ($browser) {
+            $browser->withinBody(static function ($browser) {
                 $browser->click('.task-menu-button');
             });
         }
@@ -88,7 +85,7 @@ class Taskmenu extends Component
 
         if ($browser->isPhone()) {
             $browser->withinBody(function ($browser) {
-                $browser->waitUntilMissing($this->selector());
+                $browser->waitUntilMissingOrStale($this->selector());
             });
         }
     }

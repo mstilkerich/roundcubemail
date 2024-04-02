@@ -36,33 +36,36 @@ class rcube_dovecot_passwdfile_password
 {
     public function save($currpass, $newpass, $username)
     {
-        $rcmail       = rcmail::get_instance();
+        $rcmail = rcmail::get_instance();
         $mailuserfile = $rcmail->config->get('password_dovecot_passwdfile_path') ?: '/etc/mail/imap.passwd';
 
         $password = password::hash_password($newpass);
         $username = escapeshellcmd($username); // FIXME: Do we need this?
-        $content  = '';
+        $content = '';
+
+        if ($password === false) {
+            return PASSWORD_CRYPT_ERROR;
+        }
 
         // read the entire mail user file
         $fp = fopen($mailuserfile, 'r');
 
         if (empty($fp)) {
             rcube::raise_error([
-                    'code' => 600, 'file' => __FILE__, 'line' => __LINE__,
-                    'message' => "Password plugin: Unable to read password file $mailuserfile."
-                ],
-                true, false
-            );
+                'code' => 600, 'file' => __FILE__, 'line' => __LINE__,
+                'message' => "Password plugin: Unable to read password file {$mailuserfile}.",
+            ], true, false);
 
             return PASSWORD_CONNECT_ERROR;
         }
 
-        if (flock($fp, LOCK_EX)) {
+        if (flock($fp, \LOCK_EX)) {
             // Read the file and replace the user password
             while (($line = fgets($fp, 40960)) !== false) {
-                if (strpos($line, "$username:") === 0) {
-                    $pos  = strpos($line, ':', strlen("$username:") + 1);
-                    $line = "$username:$password" . substr($line, $pos);
+                if (strpos($line, "{$username}:") === 0) {
+                    $tokens = explode(':', $line);
+                    $tokens[1] = $password;
+                    $line = implode(':', $tokens);
                 }
 
                 $content .= $line;
@@ -70,7 +73,7 @@ class rcube_dovecot_passwdfile_password
 
             // Write back the entire file
             if (file_put_contents($mailuserfile, $content)) {
-                flock($fp, LOCK_UN);
+                flock($fp, \LOCK_UN);
                 fclose($fp);
 
                 return PASSWORD_SUCCESS;
@@ -80,11 +83,9 @@ class rcube_dovecot_passwdfile_password
         fclose($fp);
 
         rcube::raise_error([
-                'code' => 600, 'file' => __FILE__, 'line' => __LINE__,
-                'message' => "Password plugin: Failed to save file $mailuserfile."
-            ],
-            true, false
-        );
+            'code' => 600, 'file' => __FILE__, 'line' => __LINE__,
+            'message' => "Password plugin: Failed to save file {$mailuserfile}.",
+        ], true, false);
 
         return PASSWORD_ERROR;
     }

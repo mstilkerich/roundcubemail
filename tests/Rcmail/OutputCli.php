@@ -2,15 +2,13 @@
 
 /**
  * Test class to test rcmail_output_cli class
- *
- * @package Tests
  */
 class Rcmail_RcmailOutputCli extends ActionTestCase
 {
     /**
      * Test show_message() method
      */
-    function test_show_message()
+    public function test_show_message()
     {
         $rcmail = rcube::get_instance();
         $output = new rcmail_output_cli();

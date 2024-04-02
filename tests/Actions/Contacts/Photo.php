@@ -2,17 +2,15 @@
 
 /**
  * Test class to test rcmail_action_contacts_photo
- *
- * @package Tests
  */
 class Actions_Contacts_Photo extends ActionTestCase
 {
     /**
      * Test run() method - no photo case
      */
-    function test_no_photo()
+    public function test_no_photo()
     {
-        $action = new rcmail_action_contacts_photo;
+        $action = new rcmail_action_contacts_photo();
         $output = $this->initOutput(rcmail_action::MODE_HTTP, 'contacts', 'photo');
 
         $this->assertInstanceOf('rcmail_action', $action);
@@ -23,7 +21,7 @@ class Actions_Contacts_Photo extends ActionTestCase
         $result = $output->getOutput();
 
         $this->assertSame(['Content-Type: image/gif'], $output->headers);
-        $this->assertSame(base64_decode(rcmail_output::BLANK_GIF), $result);
+        $this->assertSame(base64_decode(rcmail_output::BLANK_GIF, true), $result);
 
         $_GET = ['_error' => 1];
 
@@ -38,7 +36,7 @@ class Actions_Contacts_Photo extends ActionTestCase
     /**
      * Test run() method - a contact with real photo
      */
-    function test_photo()
+    public function test_photo()
     {
         $this->markTestIncomplete();
     }

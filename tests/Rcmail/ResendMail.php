@@ -1,16 +1,16 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Test class to test rcmail_resend_mail class
- *
- * @package Tests
  */
-class Rcmail_RcmailResendMail extends PHPUnit\Framework\TestCase
+class Rcmail_RcmailResendMail extends TestCase
 {
     /**
      * Test for header() method
      */
-    function test_headers()
+    public function test_headers()
     {
         $mail = new rcmail_resend_mail();
 

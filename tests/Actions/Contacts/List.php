@@ -2,17 +2,15 @@
 
 /**
  * Test class to test rcmail_action_contacts_list
- *
- * @package Tests
  */
 class Actions_Contacts_List extends ActionTestCase
 {
     /**
      * Test listing contacts
      */
-    function test_list()
+    public function test_list()
     {
-        $action = new rcmail_action_contacts_list;
+        $action = new rcmail_action_contacts_list();
         $output = $this->initOutput(rcmail_action::MODE_AJAX, 'contacts', 'list');
 
         $this->assertInstanceOf('rcmail_action', $action);

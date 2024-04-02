@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  +-----------------------------------------------------------------------+
  | This file is part of the Roundcube Webmail client                     |
  |                                                                       |
@@ -20,22 +20,18 @@
 
 /**
  * Spellchecking backend implementation to work with Pspell
- *
- * @package    Framework
- * @subpackage Utils
  */
 class rcube_spellchecker_enchant extends rcube_spellchecker_engine
 {
     private $enchant_broker;
     private $enchant_dictionary;
-    private $matches = [];
 
     /**
      * Return a list of languages supported by this backend
      *
      * @see rcube_spellchecker_engine::languages()
      */
-    function languages()
+    public function languages()
     {
         $this->init();
 
@@ -60,7 +56,7 @@ class rcube_spellchecker_enchant extends rcube_spellchecker_engine
     {
         if (!$this->enchant_broker) {
             if (!extension_loaded('enchant')) {
-                $this->error = "Enchant extension not available";
+                $this->error = 'Enchant extension not available';
                 return;
             }
 
@@ -68,7 +64,7 @@ class rcube_spellchecker_enchant extends rcube_spellchecker_engine
         }
 
         if (!enchant_broker_dict_exists($this->enchant_broker, $this->lang)) {
-            $this->error = "Unable to load dictionary for selected language using Enchant";
+            $this->error = 'Unable to load dictionary for selected language using Enchant';
             return;
         }
 
@@ -80,32 +76,31 @@ class rcube_spellchecker_enchant extends rcube_spellchecker_engine
      *
      * @see rcube_spellchecker_engine::check()
      */
-    function check($text)
+    public function check($text)
     {
         $this->init();
 
         if (!$this->enchant_dictionary) {
-            return [];
+            return true;
         }
 
         // tokenize
-        $text = preg_split($this->separator, $text, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_OFFSET_CAPTURE);
+        $text = preg_split($this->separator, $text, -1, \PREG_SPLIT_NO_EMPTY | \PREG_SPLIT_OFFSET_CAPTURE);
 
-        $diff    = 0;
+        $diff = 0;
         $matches = [];
 
         foreach ($text as $w) {
             $word = trim($w[0]);
-            $pos  = $w[1] - $diff;
-            $len  = mb_strlen($word);
+            $pos = $w[1] - $diff;
+            $len = mb_strlen($word);
 
             if ($this->dictionary->is_exception($word)) {
                 // skip exceptions
-            }
-            else if (!enchant_dict_check($this->enchant_dictionary, $word)) {
+            } elseif (!enchant_dict_check($this->enchant_dictionary, $word)) {
                 $suggestions = enchant_dict_suggest($this->enchant_dictionary, $word);
 
-                if (is_array($suggestions) && count($suggestions) > self::MAX_SUGGESTIONS) {
+                if (count($suggestions) > self::MAX_SUGGESTIONS) {
                     $suggestions = array_slice($suggestions, 0, self::MAX_SUGGESTIONS);
                 }
 
@@ -116,7 +111,8 @@ class rcube_spellchecker_enchant extends rcube_spellchecker_engine
         }
 
         $this->matches = $matches;
-        return $matches;
+
+        return count($matches) == 0;
     }
 
     /**
@@ -124,7 +120,7 @@ class rcube_spellchecker_enchant extends rcube_spellchecker_engine
      *
      * @see rcube_spellchecker_engine::get_words()
      */
-    function get_suggestions($word)
+    public function get_suggestions($word)
     {
         $this->init();
 
@@ -134,11 +130,11 @@ class rcube_spellchecker_enchant extends rcube_spellchecker_engine
 
         $suggestions = enchant_dict_suggest($this->enchant_dictionary, $word);
 
-        if (is_array($suggestions) && count($suggestions) > self::MAX_SUGGESTIONS) {
+        if (count($suggestions) > self::MAX_SUGGESTIONS) {
             $suggestions = array_slice($suggestions, 0, self::MAX_SUGGESTIONS);
         }
 
-        return is_array($suggestions) ? $suggestions : [];
+        return $suggestions;
     }
 
     /**
@@ -146,7 +142,7 @@ class rcube_spellchecker_enchant extends rcube_spellchecker_engine
      *
      * @see rcube_spellchecker_engine::get_suggestions()
      */
-    function get_words($text = null)
+    public function get_words($text = null)
     {
         $result = [];
 
@@ -159,7 +155,7 @@ class rcube_spellchecker_enchant extends rcube_spellchecker_engine
             }
 
             // With Enchant we don't need to get suggestions to return misspelled words
-            $text = preg_split($this->separator, $text, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_OFFSET_CAPTURE);
+            $text = preg_split($this->separator, $text, -1, \PREG_SPLIT_NO_EMPTY | \PREG_SPLIT_OFFSET_CAPTURE);
 
             foreach ($text as $w) {
                 $word = trim($w[0]);

@@ -1,20 +1,19 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Test class to test rcube_result_set class
- *
- * @package Tests
  */
-class Framework_ResultSet extends PHPUnit\Framework\TestCase
+class Framework_ResultSet extends TestCase
 {
-
     /**
      * Class constructor
      */
-    function test_class()
+    public function test_class()
     {
-        $object = new rcube_result_set;
+        $object = new rcube_result_set();
 
-        $this->assertInstanceOf('rcube_result_set', $object, "Class constructor");
+        $this->assertInstanceOf('rcube_result_set', $object, 'Class constructor');
     }
 }

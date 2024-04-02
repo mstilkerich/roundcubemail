@@ -1,6 +1,8 @@
 <?php
 
-class Autologout_Plugin extends PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+
+class Autologout_Plugin extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
@@ -10,9 +12,9 @@ class Autologout_Plugin extends PHPUnit\Framework\TestCase
     /**
      * Plugin object construction test
      */
-    function test_constructor()
+    public function test_constructor()
     {
-        $rcube  = rcube::get_instance();
+        $rcube = rcube::get_instance();
         $plugin = new autologout($rcube->plugins);
 
         $this->assertInstanceOf('autologout', $plugin);
@@ -22,4 +24,3 @@ class Autologout_Plugin extends PHPUnit\Framework\TestCase
         $plugin->startup([]);
     }
 }
-

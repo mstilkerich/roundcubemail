@@ -19,22 +19,25 @@
  +-----------------------------------------------------------------------+
 */
 
-define('INSTALL_PATH', realpath(__DIR__ . '/..') . '/' );
+define('INSTALL_PATH', realpath(__DIR__ . '/..') . '/');
 
 require_once INSTALL_PATH . 'program/include/clisetup.php';
 
 function print_usage()
 {
-    print "Usage: deluser.sh [--host=HOST][--age=DAYS][--dry-run] [username]\n";
-    print "--host=HOST  The IMAP hostname or IP the given user is related to\n";
-    print "--age=DAYS   Delete all users who have not logged in for more than X days\n";
-    print "--dry-run    List users but do not delete them (for use with --age)\n";
+    echo "Usage: deluser.sh [--host=HOST][--age=DAYS][--dry-run] [username]\n";
+    echo "--host=HOST  The IMAP hostname or IP the given user is related to\n";
+    echo "--age=DAYS   Delete all users who have not logged in for more than X days\n";
+    echo "--dry-run    List users but do not delete them (for use with --age)\n";
 }
 
-function _die($msg, $usage=false)
+function _die($msg, $usage = false)
 {
-    fwrite(STDERR, $msg . "\n");
-    if ($usage) print_usage();
+    fwrite(\STDERR, $msg . "\n");
+    if ($usage) {
+        print_usage();
+    }
+
     exit(1);
 }
 
@@ -47,9 +50,9 @@ if (!empty($args['age']) && ($age = intval($args['age']))) {
     $db = $rcmail->get_dbh();
     $db->db_connect('r');
 
-    $query = $db->query("SELECT `username`, `mail_host` FROM " . $db->table_name('users', true)
-        . " WHERE `last_login` < " . $db->now($age * -1 * 86400)
-        . ($args['host'] ? " AND `mail_host` = " . $db->quote($args['host']) : '')
+    $query = $db->query('SELECT `username`, `mail_host` FROM ' . $db->table_name('users', true)
+        . ' WHERE `last_login` < ' . $db->now($age * -1 * 86400)
+        . ($args['host'] ? ' AND `mail_host` = ' . $db->quote($args['host']) : '')
     );
 
     while ($user = $db->fetch_assoc($query)) {
@@ -57,33 +60,17 @@ if (!empty($args['age']) && ($age = intval($args['age']))) {
             printf("%s (%s)\n", $user['username'], $user['mail_host']);
             continue;
         }
-        system(sprintf("php %s/deluser.sh --host=%s %s", INSTALL_PATH . 'bin', escapeshellarg($user['mail_host']), escapeshellarg($user['username'])));
+        system(sprintf('%s/deluser.sh --host=%s %s', INSTALL_PATH . 'bin', escapeshellarg($user['mail_host']), escapeshellarg($user['username'])));
     }
+
     exit(0);
 }
 
+$hostname = rcmail_utils::get_host($args);
 $username = isset($args[0]) ? trim($args[0]) : null;
+
 if (empty($username)) {
-    _die("Missing required parameters", true);
-}
-
-if (empty($args['host'])) {
-    $hosts = $rcmail->config->get('default_host', '');
-    if (is_string($hosts)) {
-        $args['host'] = $hosts;
-    }
-    else if (is_array($hosts) && count($hosts) == 1) {
-        $args['host'] = reset($hosts);
-    }
-    else {
-        _die("Specify a host name", true);
-    }
-
-    // host can be a URL like tls://192.168.12.44
-    $host_url = parse_url($args['host']);
-    if ($host_url['host']) {
-        $args['host'] = $host_url['host'];
-    }
+    _die('Missing required parameters', true);
 }
 
 // connect to DB
@@ -96,14 +83,14 @@ if (!$db->is_connected() || $db->is_error()) {
 }
 
 // find user in local database
-$user = rcube_user::query($username, $args['host']);
+$user = rcube_user::query($username, $hostname);
 
 if (!$user) {
-    die("User not found.\n");
+    exit("User not found.\n");
 }
 
 // inform plugins about approaching user deletion
-$plugin = $rcmail->plugins->exec_hook('user_delete_prepare', ['user' => $user, 'username' => $username, 'host' => $args['host']]);
+$plugin = $rcmail->plugins->exec_hook('user_delete_prepare', ['user' => $user, 'username' => $username, 'host' => $hostname]);
 
 // let plugins cleanup their own user-related data
 if (!$plugin['abort']) {
@@ -116,16 +103,15 @@ if ($plugin['abort']) {
     if ($transaction) {
         $db->rollbackTransaction();
     }
-    _die("User deletion aborted by plugin");
+    _die('User deletion aborted by plugin');
 }
 
 $db->query('DELETE FROM ' . $db->table_name('users', true) . ' WHERE `user_id` = ?', $user->ID);
 
 if ($db->is_error()) {
     $rcmail->plugins->exec_hook('user_delete_rollback', $plugin);
-    _die("DB error occurred: " . $db->is_error());
-}
-else {
+    _die('DB error occurred: ' . $db->is_error());
+} else {
     // inform plugins about executed user deletion
     $plugin = $rcmail->plugins->exec_hook('user_delete_commit', $plugin);
 
@@ -133,9 +119,8 @@ else {
         unset($plugin['abort']);
         $db->rollbackTransaction();
         $rcmail->plugins->exec_hook('user_delete_rollback', $plugin);
-    }
-    else {
+    } else {
         $db->endTransaction();
-        echo "Successfully deleted user $user->ID\n";
+        echo "Successfully deleted user {$user->ID}\n";
     }
 }

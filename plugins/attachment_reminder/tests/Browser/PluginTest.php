@@ -3,8 +3,9 @@
 namespace Tests\Browser\Plugins\AttachmentReminder;
 
 use Tests\Browser\Components\Dialog;
+use Tests\Browser\TestCase;
 
-class PluginTest extends \Tests\Browser\TestCase
+class PluginTest extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
@@ -16,18 +17,18 @@ class PluginTest extends \Tests\Browser\TestCase
      */
     public function testPreferences()
     {
-        $this->browse(function ($browser) {
+        $this->browse(static function ($browser) {
             $browser->go('settings', 'preferences');
 
             $browser->click('#sections-table tr.compose');
 
-            $browser->withinFrame('#preferences-frame', function ($browser) {
+            $browser->withinFrame('#preferences-frame', static function ($browser) {
                 if (!$browser->isPhone()) {
                     $browser->waitFor('.formbuttons button.submit');
                 }
 
                 // Main Options fieldset
-                $browser->with('form.propform fieldset.main', function ($browser) {
+                $browser->with('form.propform fieldset.main', static function ($browser) {
                     $browser->assertSeeIn('label[for=rcmfd_attachment_reminder]', 'Remind about forgotten attachments')
                         ->assertCheckboxState('_attachment_reminder', false)
                         ->setCheckboxState('_attachment_reminder', true);
@@ -46,7 +47,7 @@ class PluginTest extends \Tests\Browser\TestCase
             $browser->waitForMessage('confirmation', 'Successfully saved');
 
             // Verify if every option has been updated
-            $browser->withinFrame('#preferences-frame', function ($browser) {
+            $browser->withinFrame('#preferences-frame', static function ($browser) {
                 $browser->assertCheckboxState('_attachment_reminder', true);
             });
         });
@@ -59,7 +60,7 @@ class PluginTest extends \Tests\Browser\TestCase
      */
     public function testMailCompose()
     {
-        $this->browse(function ($browser) {
+        $this->browse(static function ($browser) {
             $send_btn = $browser->isPhone() ? '.buttons a.send' : '.formbuttons button.send';
 
             $browser->go('mail', 'compose');
@@ -71,7 +72,7 @@ class PluginTest extends \Tests\Browser\TestCase
                 ->click($send_btn);
 
             // Expect a dialog, Click "Attach a file" button
-            $browser->with(new Dialog(), function ($browser) {
+            $browser->with(new Dialog(), static function ($browser) {
                 $browser->assertDialogTitle('Missing attachment?')
                     ->assertDialogContent('Did you forget to attach a file?')
                     ->assertButton('mainaction.attach', 'Attach a file')
@@ -83,7 +84,7 @@ class PluginTest extends \Tests\Browser\TestCase
             $browser->click($send_btn);
 
             // Expect the dialog again, click Send button (in the dialog)
-            $browser->with(new Dialog(), function ($browser) {
+            $browser->with(new Dialog(), static function ($browser) {
                 $browser->assertDialogTitle('Missing attachment?')
                     ->clickButton('send');
             });

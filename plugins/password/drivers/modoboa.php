@@ -7,6 +7,7 @@
  * Return value is a json string saying result: true if success.
  *
  * @version 1.0.1
+ *
  * @author stephane @actionweb.fr
  *
  * Copyright (C) The Roundcube Dev Team
@@ -24,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  *
- * The driver need modoboa core 1.10.6 or later 
+ * The driver need modoboa core 1.10.6 or later
  *
  * You need to define theses variables in plugin/password/config.inc.php
  *
@@ -35,34 +36,34 @@
 
 class rcube_modoboa_password
 {
-    function save($curpass, $passwd)
+    public function save($curpass, $passwd)
     {
         // Init config access
-        $rcmail           = rcmail::get_instance();
-        $ModoboaToken     = $rcmail->config->get('password_modoboa_api_token');
+        $rcmail = rcmail::get_instance();
+        $ModoboaToken = $rcmail->config->get('password_modoboa_api_token');
         $RoudCubeUsername = $_SESSION['username'];
-        $IMAPhost         = $_SESSION['imap_host'];
+        $IMAPhost = $_SESSION['imap_host'];
 
         // Call GET to fetch values from modoboa server
         $curl = curl_init();
 
         curl_setopt_array($curl, [
-            CURLOPT_URL            => "https://" . $IMAPhost . "/api/v1/accounts/?search=" . urlencode($RoudCubeUsername),
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING       => "",
-            CURLOPT_MAXREDIRS      => 10,
-            CURLOPT_TIMEOUT        => 30,
-            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST  => "GET",
-            CURLOPT_HTTPHEADER     => [
-                "Authorization: Token " . $ModoboaToken,
-                "Cache-Control: no-cache",
-                "Content-Type: application/json"
+            \CURLOPT_URL => 'https://' . $IMAPhost . '/api/v1/accounts/?search=' . urlencode($RoudCubeUsername),
+            \CURLOPT_RETURNTRANSFER => true,
+            \CURLOPT_ENCODING => '',
+            \CURLOPT_MAXREDIRS => 10,
+            \CURLOPT_TIMEOUT => 30,
+            \CURLOPT_HTTP_VERSION => \CURL_HTTP_VERSION_1_1,
+            \CURLOPT_CUSTOMREQUEST => 'GET',
+            \CURLOPT_HTTPHEADER => [
+                'Authorization: Token ' . $ModoboaToken,
+                'Cache-Control: no-cache',
+                'Content-Type: application/json',
             ],
         ]);
 
         $response = curl_exec($curl);
-        $err      = curl_error($curl);
+        $err = curl_error($curl);
 
         curl_close($curl);
 
@@ -82,32 +83,32 @@ class rcube_modoboa_password
 
         // Encode json with new password
         $ret['username'] = $decoded[0]->username;
-        $ret['mailbox']  = $decoded[0]->mailbox;
-        $ret['role']     = $decoded[0]->role;
+        $ret['mailbox'] = $decoded[0]->mailbox;
+        $ret['role'] = $decoded[0]->role;
         $ret['password'] = $passwd; // new password
-        $encoded         = json_encode($ret);
+        $encoded = json_encode($ret);
 
         // Call HTTP API Modoboa
         $curl = curl_init();
 
         curl_setopt_array($curl, [
-            CURLOPT_URL            => "https://" . $IMAPhost . "/api/v1/accounts/" . $userid . "/",
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING       => "",
-            CURLOPT_MAXREDIRS      => 10,
-            CURLOPT_TIMEOUT        => 30,
-            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST  => "PUT",
-            CURLOPT_POSTFIELDS     => "" . $encoded . "",
-            CURLOPT_HTTPHEADER     => [
-                "Authorization: Token " . $ModoboaToken,
-                "Cache-Control: no-cache",
-                "Content-Type: application/json"
+            \CURLOPT_URL => 'https://' . $IMAPhost . '/api/v1/accounts/' . $userid . '/',
+            \CURLOPT_RETURNTRANSFER => true,
+            \CURLOPT_ENCODING => '',
+            \CURLOPT_MAXREDIRS => 10,
+            \CURLOPT_TIMEOUT => 30,
+            \CURLOPT_HTTP_VERSION => \CURL_HTTP_VERSION_1_1,
+            \CURLOPT_CUSTOMREQUEST => 'PUT',
+            \CURLOPT_POSTFIELDS => '' . $encoded . '',
+            \CURLOPT_HTTPHEADER => [
+                'Authorization: Token ' . $ModoboaToken,
+                'Cache-Control: no-cache',
+                'Content-Type: application/json',
             ],
         ]);
 
         $response = curl_exec($curl);
-        $err      = curl_error($curl);
+        $err = curl_error($curl);
 
         curl_close($curl);
 

@@ -1,17 +1,16 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Test class to test rcube_ldap class
- *
- * @package Tests
  */
-class Framework_Ldap extends PHPUnit\Framework\TestCase
+class Framework_Ldap extends TestCase
 {
-
     /**
      * Class constructor
      */
-    function test_class()
+    public function test_class()
     {
         // skip test if Net_LDAP3 does not exist
         if (!class_exists('Net_LDAP3')) {
@@ -23,11 +22,11 @@ class Framework_Ldap extends PHPUnit\Framework\TestCase
             $this->markTestSkipped('The ldap extension is not available.');
         }
 
-        StdErrMock::start();
+        StderrMock::start();
         $object = new rcube_ldap([]);
-        StdErrMock::stop();
+        StderrMock::stop();
 
-        $this->assertInstanceOf('rcube_ldap', $object, "Class constructor");
+        $this->assertInstanceOf('rcube_ldap', $object, 'Class constructor');
         $this->assertSame('ERROR: Could not connect to any LDAP server', trim(StderrMock::$output));
     }
 }

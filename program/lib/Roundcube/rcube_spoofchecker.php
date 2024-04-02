@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  +-----------------------------------------------------------------------+
  | This file is part of the Roundcube Webmail client                     |
  |                                                                       |
@@ -20,9 +20,6 @@
 
 /**
  * Helper class for spoofing detection.
- *
- * @package    Framework
- * @subpackage Utils
  */
 class rcube_spoofchecker
 {
@@ -47,17 +44,21 @@ class rcube_spoofchecker
         }
 
         // Spoofchecker is part of ext-intl (requires ICU >= 4.2)
-        $checker = new Spoofchecker();
+        try {
+            $checker = new Spoofchecker();
 
-        // Note: The constant (and method?) added in PHP 7.3.0
-        if (defined('Spoofchecker::HIGHLY_RESTRICTIVE')) {
-            $checker->setRestrictionLevel(Spoofchecker::HIGHLY_RESTRICTIVE);
-        }
-        else {
-            $checker->setChecks(Spoofchecker::SINGLE_SCRIPT | Spoofchecker::INVISIBLE);
-        }
+            // Note: The constant (and method?) added in PHP 7.3.0
+            if (defined('Spoofchecker::HIGHLY_RESTRICTIVE')) {
+                $checker->setRestrictionLevel(Spoofchecker::HIGHLY_RESTRICTIVE);
+            } else {
+                $checker->setChecks(Spoofchecker::SINGLE_SCRIPT | Spoofchecker::INVISIBLE);
+            }
 
-        $result = $checker->isSuspicious($domain);
+            $result = $checker->isSuspicious($domain);
+        } catch (Throwable $e) {
+            rcube::raise_error($e, true);
+            $result = false;
+        }
 
         // TODO: Use areConfusable() to detect ascii-spoofing of some domains, e.g. paypa1.com?
         // TODO: Domains with non-printable characters should be considered spoofed

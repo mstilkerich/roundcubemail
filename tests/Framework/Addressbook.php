@@ -1,16 +1,16 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Test class to test rcube_addressbook class
- *
- * @package Tests
  */
-class Framework_Addressbook extends PHPUnit\Framework\TestCase
+class Framework_Addressbook extends TestCase
 {
     /**
      * Test for get_col_values() method
      */
-    function test_get_col_values()
+    public function test_get_col_values()
     {
         $data = ['email' => 'test@test.com', 'other' => 'test'];
         $result = rcube_addressbook::get_col_values('email', $data, true);
@@ -31,20 +31,20 @@ class Framework_Addressbook extends PHPUnit\Framework\TestCase
     /**
      * Test for compose_list_name() method
      */
-    function test_compose_list_name()
+    public function test_compose_list_name()
     {
         $contact = [];
-        $result  = rcube_addressbook::compose_list_name($contact);
+        $result = rcube_addressbook::compose_list_name($contact);
 
         $this->assertSame('', $result);
 
         $contact = ['email' => 'email@address.tld'];
-        $result  = rcube_addressbook::compose_list_name($contact);
+        $result = rcube_addressbook::compose_list_name($contact);
 
         $this->assertSame('email@address.tld', $result);
 
         $contact = ['email' => 'email@address.tld', 'organization' => 'Org'];
-        $result  = rcube_addressbook::compose_list_name($contact);
+        $result = rcube_addressbook::compose_list_name($contact);
 
         $this->assertSame('Org', $result);
 

@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  +-----------------------------------------------------------------------+
  | This file is part of the Roundcube Webmail client                     |
  |                                                                       |
@@ -19,8 +19,6 @@
 
 /**
  * A class for easier testing of code utilizing rcube_storage
- *
- * @package Tests
  */
 class StorageMock
 {
@@ -46,7 +44,7 @@ class StorageMock
             }
         }
 
-        throw new Exception("Unhandled function call for '$name' in StorageMock");
+        throw new Exception("Unhandled function call for '{$name}' in StorageMock");
     }
 
     /**

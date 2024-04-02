@@ -2,17 +2,15 @@
 
 /**
  * Test class to test rcmail_action_settings_identities
- *
- * @package Tests
  */
 class Actions_Settings_Identities extends ActionTestCase
 {
     /**
      * Test run() method
      */
-    function test_run()
+    public function test_run()
     {
-        $action = new rcmail_action_settings_identities;
+        $action = new rcmail_action_settings_identities();
         $output = $this->initOutput(rcmail_action::MODE_HTTP, 'settings', 'identities');
 
         $this->assertInstanceOf('rcmail_action', $action);
@@ -26,17 +24,17 @@ class Actions_Settings_Identities extends ActionTestCase
 
         $this->assertSame('identities', $output->template);
         $this->assertSame('Identities', $output->getProperty('pagetitle'));
-        $this->assertTrue(stripos($result, "<!DOCTYPE html>") === 0);
-        $this->assertTrue(strpos($result, "test@example.org") !== false);
+        $this->assertTrue(stripos($result, '<!DOCTYPE html>') === 0);
+        $this->assertTrue(strpos($result, 'test@example.org') !== false);
         $this->assertMatchesRegularExpression('/list(.min)?.js/', $result);
     }
 
     /**
      * Test identities_list() method
      */
-    function test_identities_list()
+    public function test_identities_list()
     {
-        $action = new rcmail_action_settings_identities;
+        $action = new rcmail_action_settings_identities();
         $output = $this->initOutput(rcmail_action::MODE_HTTP, 'settings', 'identities');
 
         self::initDB('identities');

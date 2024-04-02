@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  +-----------------------------------------------------------------------+
  | This file is part of the Roundcube Webmail client                     |
  |                                                                       |
@@ -21,28 +21,21 @@
 
 /**
  * Interface implementation class for accessing Memcache cache
- *
- * @package    Framework
- * @subpackage Cache
  */
 class rcube_cache_memcache extends rcube_cache
 {
     /**
      * Instance of memcache handler
      *
-     * @var Memcache
+     * @var Memcache|false|null
      */
     protected static $memcache;
 
-
-    /**
-     * {@inheritdoc}
-     */
     public function __construct($userid, $prefix = '', $ttl = 0, $packed = true, $indexed = false)
     {
         parent::__construct($userid, $prefix, $ttl, $packed, $indexed);
 
-        $this->type  = 'memcache';
+        $this->type = 'memcache';
         $this->debug = rcube::get_instance()->config->get('memcache_debug');
 
         self::engine();
@@ -51,7 +44,7 @@ class rcube_cache_memcache extends rcube_cache
     /**
      * Get global handle for memcache access
      *
-     * @return object Memcache
+     * @return Memcache|false
      */
     public static function engine()
     {
@@ -64,45 +57,46 @@ class rcube_cache_memcache extends rcube_cache
             self::$memcache = false;
 
             rcube::raise_error([
-                    'code' => 604,
-                    'type' => 'memcache',
-                    'line' => __LINE__,
-                    'file' => __FILE__,
-                    'message' => "Failed to find Memcache. Make sure php-memcache is included"
-                ],
-                true, true);
+                'code' => 604,
+                'type' => 'memcache',
+                'line' => __LINE__,
+                'file' => __FILE__,
+                'message' => 'Failed to find Memcache. Make sure php-memcache is included',
+            ], true, true);
         }
 
         // add all configured hosts to pool
         $rcube = rcube::get_instance();
-        $pconnect       = $rcube->config->get('memcache_pconnect', true);
-        $timeout        = $rcube->config->get('memcache_timeout', 1);
+        $pconnect = $rcube->config->get('memcache_pconnect', true);
+        $timeout = $rcube->config->get('memcache_timeout', 1);
         $retry_interval = $rcube->config->get('memcache_retry_interval', 15);
-        $seen           = [];
-        $available      = 0;
+        $seen = [];
+        $available = 0;
 
         // Callback for memcache failure
-        $error_callback = function($host, $port) use ($seen, $available) {
+        $error_callback = static function ($host, $port) use (&$seen, $available) {
             // only report once
-            if (!$seen["$host:$port"]++) {
+            if (!array_key_exists("{$host}:{$port}", $seen)) {
+                $seen["{$host}:{$port}"] = true;
                 $available--;
+
                 rcube::raise_error([
-                        'code' => 604, 'type' => 'memcache',
-                        'line' => __LINE__, 'file' => __FILE__,
-                        'message' => "Memcache failure on host $host:$port"
-                    ],
-                    true, false);
+                    'code' => 604, 'type' => 'memcache',
+                    'line' => __LINE__, 'file' => __FILE__,
+                    'message' => "Memcache failure on host {$host}:{$port}",
+                ], true, false);
             }
         };
 
-        self::$memcache = new Memcache;
+        self::$memcache = new Memcache();
 
         foreach ((array) $rcube->config->get('memcache_hosts') as $host) {
             if (substr($host, 0, 7) != 'unix://') {
-                list($host, $port) = explode(':', $host);
-                if (!$port) $port = 11211;
-            }
-            else {
+                [$host, $port] = explode(':', $host);
+                if (!$port) {
+                    $port = 11211;
+                }
+            } else {
                 $port = 0;
             }
 
@@ -164,7 +158,7 @@ class rcube_cache_memcache extends rcube_cache
      * @param string $key  Cache internal key name
      * @param mixed  $data Serialized cache data
      *
-     * @param bool True on success, False on failure
+     * @return bool True on success, False on failure
      */
     protected function add_item($key, $data)
     {
@@ -172,10 +166,10 @@ class rcube_cache_memcache extends rcube_cache
             return false;
         }
 
-        $result = self::$memcache->replace($key, $data, MEMCACHE_COMPRESSED, $this->ttl);
+        $result = self::$memcache->replace($key, $data, \MEMCACHE_COMPRESSED, $this->ttl);
 
         if (!$result) {
-            $result = self::$memcache->set($key, $data, MEMCACHE_COMPRESSED, $this->ttl);
+            $result = self::$memcache->set($key, $data, \MEMCACHE_COMPRESSED, $this->ttl);
         }
 
         if ($this->debug) {
@@ -190,7 +184,7 @@ class rcube_cache_memcache extends rcube_cache
      *
      * @param string $key Cache internal key name
      *
-     * @param bool True on success, False on failure
+     * @return bool True on success, False on failure
      */
     protected function delete_item($key)
     {

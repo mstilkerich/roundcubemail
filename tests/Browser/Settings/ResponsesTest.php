@@ -5,8 +5,9 @@ namespace Tests\Browser\Settings;
 use Tests\Browser\Components\App;
 use Tests\Browser\Components\Dialog;
 use Tests\Browser\Components\Popupmenu;
+use Tests\Browser\TestCase;
 
-class ResponsesTest extends \Tests\Browser\TestCase
+class ResponsesTest extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
@@ -15,10 +16,10 @@ class ResponsesTest extends \Tests\Browser\TestCase
 
     public function testResponses()
     {
-        $this->browse(function ($browser) {
+        $this->browse(static function ($browser) {
             $browser->go('settings', 'responses');
 
-            $browser->with(new App(), function ($browser) {
+            $browser->with(new App(), static function ($browser) {
                 // check task and action
                 $browser->assertEnv('task', 'settings');
                 $browser->assertEnv('action', 'responses');
@@ -54,21 +55,20 @@ class ResponsesTest extends \Tests\Browser\TestCase
             INSERT INTO responses (user_id, name, data, is_html) VALUES (1, 'response 2', '<p><b>test response 2</b></p>', '1');
         ");
 
-        $this->browse(function ($browser) {
+        $this->browse(static function ($browser) {
             $browser->go('settings', 'responses');
 
             if ($browser->isPhone()) {
                 $browser->assertVisible('.floating-action-buttons a.create:not(.disabled)')
                     ->click('.floating-action-buttons a.create')
                     ->waitFor('#preferences-frame');
-            }
-            else {
+            } else {
                 $browser->clickToolbarMenuItem('create');
             }
 
-            $browser->withinFrame('#preferences-frame', function($browser) {
+            $browser->withinFrame('#preferences-frame', static function ($browser) {
                 $browser->waitFor('form')
-                    ->with('form', function ($browser) {
+                    ->with('form', static function ($browser) {
                         $browser->assertVisible('input[name=_name]')
                             ->assertValue('input[name=_name]', '')
                             ->assertSeeIn('label[for=ffname]', 'Name')
@@ -93,9 +93,9 @@ class ResponsesTest extends \Tests\Browser\TestCase
                 ->closeMessage('confirmation')
                 ->waitFor('#preferences-frame');
 
-            $browser->withinFrame('#preferences-frame', function($browser) {
+            $browser->withinFrame('#preferences-frame', static function ($browser) {
                 $browser->waitFor('form')
-                    ->with('form', function ($browser) {
+                    ->with('form', static function ($browser) {
                         $browser->assertVisible('input[name=_name]')
                             ->assertValue('input[name=_name]', 'Test')
                             ->assertValue('textarea[name=_text]', 'Response Body');
@@ -108,13 +108,13 @@ class ResponsesTest extends \Tests\Browser\TestCase
             }
 
             // Responses list
-            $browser->with('#responses-table', function ($browser) {
+            $browser->with('#responses-table', static function ($browser) {
                 $browser->assertElementsCount('tbody tr', 3)
                     ->assertSeeIn('tbody tr:nth-child(3)', 'Test');
             });
 
             if ($browser->isPhone()) {
-                $browser->click('#responses-table tbody tr:first-child')
+                $browser->click('#responses-table tbody tr:last-child')
                     ->waitFor('#preferences-frame');
             }
 
@@ -127,15 +127,16 @@ class ResponsesTest extends \Tests\Browser\TestCase
      * Test response deletion
      *
      * @depends testResponseCreate
+     *
      * @group failsontravis-phone
      * @group failsonga-phone
      */
     public function testResponseDelete()
     {
-        $this->browse(function ($browser) {
+        $this->browse(static function ($browser) {
             $browser->clickToolbarMenuItem('delete');
 
-            $browser->with(new Dialog(), function ($browser) {
+            $browser->with(new Dialog(), static function ($browser) {
                 $browser->assertDialogTitle('Are you sure...')
                     ->assertDialogContent('Do you really want to delete this response text?')
                     ->assertButton('mainaction.delete', 'Delete')
@@ -147,7 +148,7 @@ class ResponsesTest extends \Tests\Browser\TestCase
                 ->closeMessage('confirmation');
 
             // Preview frame should reset to the watermark page
-            $browser->withinFrame('#preferences-frame', function($browser) {
+            $browser->withinFrame('#preferences-frame', static function ($browser) {
                 $browser->waitUntilMissing('> div');
             });
 
@@ -163,12 +164,13 @@ class ResponsesTest extends \Tests\Browser\TestCase
      * Test responses in mail composer
      *
      * @depends testResponseDelete
+     *
      * @group failsontravis-phone
      * @group failsonga-phone
      */
     public function testResponsesInComposer()
     {
-        $this->browse(function ($browser) {
+        $this->browse(static function ($browser) {
             if ($browser->isPhone()) {
                 $browser->click('a.back-sidebar-button');
             }
@@ -176,20 +178,21 @@ class ResponsesTest extends \Tests\Browser\TestCase
             // Goto Compose and test the responses menu
             $browser->clickTaskMenuItem('compose')
                 ->waitFor('#compose-content')
-                ->clickToolbarMenuItem('responses')
-                ->with(new Popupmenu('responses-menu'), function ($browser) {
+                ->clickToolbarMenuItem('responses', null, false)
+                ->with(new Popupmenu('responses-menu'), static function ($browser) {
                     $browser->assertMenuState(['edit.responses'])
-                        ->with('#responseslist', function ($browser) {
+                        ->with('#responseslist', static function ($browser) {
                             $browser->assertElementsCount('li', 2)
                                 ->assertSeeIn('li:nth-child(1) a.insertresponse', 'response 1')
                                 ->assertSeeIn('li:nth-child(2) a.insertresponse', 'response 2');
                         })
                         ->closeMenu();
-                });
+                })
+                ->closeToolbarMenu();
 
             // Insert a response to the message body
             $browser->type('#composebody', 'Body and ')
-                ->clickToolbarMenuItem('responses')
+                ->clickToolbarMenuItem('responses', null, false)
                 ->waitFor('#responseslist')
                 ->click('#responseslist li:nth-child(1) a.insertresponse')
                 ->waitUntilMissing('#responses-menu');
@@ -207,17 +210,18 @@ class ResponsesTest extends \Tests\Browser\TestCase
      * Test response update
      *
      * @depends testResponsesInComposer
+     *
      * @group failsontravis-phone
      * @group failsonga-phone
      */
     public function testResponseUpdate()
     {
-        $this->browse(function ($browser) {
+        $this->browse(static function ($browser) {
             // We're in mail compose, use responses menu to goto Settings > Responses
-            $browser->clickToolbarMenuItem('responses')
+            $browser->clickToolbarMenuItem('responses', null, false)
                 ->waitFor('#responses-menu')
                 ->click('#responses-menu a.edit.responses')
-                ->with(new Dialog(), function ($browser) {
+                ->with(new Dialog(), static function ($browser) {
                     $browser->assertDialogTitle('Are you sure...')
                         ->assertDialogContent('The message has not been sent and has unsaved changes. Do you want to discard your changes?')
                         ->assertButton('mainaction.discard', 'Discard')
@@ -230,9 +234,9 @@ class ResponsesTest extends \Tests\Browser\TestCase
                 ->click('#responses-table tbody tr:first-child')
                 ->waitFor('#preferences-frame');
 
-            $browser->withinFrame('#preferences-frame', function($browser) {
+            $browser->withinFrame('#preferences-frame', static function ($browser) {
                 $browser->waitFor('form')
-                    ->with('form', function ($browser) {
+                    ->with('form', static function ($browser) {
                         $browser->assertValue('[name=_name]', 'response 1')
                             ->assertValue('[name=_text]', 'test response 1')
                             ->type('[name=_name]', 'Test 11')
@@ -246,7 +250,7 @@ class ResponsesTest extends \Tests\Browser\TestCase
 
             if ($browser->isPhone()) {
                 $browser->waitFor('#layout-content .footer')
-                    ->with('#layout-content .footer', function ($browser) {
+                    ->with('#layout-content .footer', static function ($browser) {
                         $browser->assertVisible('a.button.prev.disabled')
                             ->assertVisible('a.button.next:not(.disabled)')
                             ->click('a.button.submit');
@@ -262,7 +266,7 @@ class ResponsesTest extends \Tests\Browser\TestCase
             }
 
             // Responses list
-            $browser->with('#responses-table', function ($browser) {
+            $browser->with('#responses-table', static function ($browser) {
                 $browser->assertSeeIn('tbody tr:nth-child(1)', 'Test 11');
             });
         });

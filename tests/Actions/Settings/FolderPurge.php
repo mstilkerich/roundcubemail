@@ -2,24 +2,22 @@
 
 /**
  * Test class to test rcmail_action_settings_folder_purge
- *
- * @package Tests
  */
 class Actions_Settings_FolderPurge extends ActionTestCase
 {
     /**
      * Test purging a folder
      */
-    function test_purge()
+    public function test_purge()
     {
-        $action = new rcmail_action_settings_folder_purge;
+        $action = new rcmail_action_settings_folder_purge();
         $output = $this->initOutput(rcmail_action::MODE_AJAX, 'settings', 'folder-purge');
 
         $this->assertInstanceOf('rcmail_action', $action);
         $this->assertTrue($action->checks());
 
         // Set expected storage function calls/results
-        rcmail::get_instance()->storage
+        self::mockStorage()
             ->registerFunction('move_message', true)
             ->registerFunction('get_quota', false);
 
@@ -40,16 +38,16 @@ class Actions_Settings_FolderPurge extends ActionTestCase
     /**
      * Test purging a Trash folder
      */
-    function test_purge_trash()
+    public function test_purge_trash()
     {
-        $action = new rcmail_action_settings_folder_purge;
+        $action = new rcmail_action_settings_folder_purge();
         $output = $this->initOutput(rcmail_action::MODE_AJAX, 'settings', 'folder-purge');
 
         $this->assertInstanceOf('rcmail_action', $action);
         $this->assertTrue($action->checks());
 
         // Set expected storage function calls/results
-        rcmail::get_instance()->storage
+        self::mockStorage()
             ->registerFunction('delete_message', true)
             ->registerFunction('get_quota', false);
 
@@ -70,13 +68,13 @@ class Actions_Settings_FolderPurge extends ActionTestCase
     /**
      * Test handling errors
      */
-    function test_purge_errors()
+    public function test_purge_errors()
     {
-        $action = new rcmail_action_settings_folder_purge;
+        $action = new rcmail_action_settings_folder_purge();
         $output = $this->initOutput(rcmail_action::MODE_AJAX, 'settings', 'folder-purge');
 
         // Set expected storage function calls/results
-        rcmail::get_instance()->storage
+        self::mockStorage()
             ->registerFunction('move_message', false)
             ->registerFunction('get_error_code', -1)
             ->registerFunction('get_response_code', rcube_storage::READONLY);

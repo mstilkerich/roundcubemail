@@ -1,26 +1,26 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Test class to test rcube_string_replacer class
- *
- * @package Tests
  */
-class Framework_StringReplacer extends PHPUnit\Framework\TestCase
+class Framework_StringReplacer extends TestCase
 {
     /**
      * Class constructor
      */
-    function test_class()
+    public function test_class()
     {
-        $sr = new rcube_string_replacer;
+        $sr = new rcube_string_replacer();
 
-        $this->assertInstanceOf('rcube_string_replacer', $sr, "Class constructor");
+        $this->assertInstanceOf('rcube_string_replacer', $sr, 'Class constructor');
     }
 
     /**
      * Data for test_replace()
      */
-    function data_replace()
+    public static function provide_replace_cases(): iterable
     {
         return [
             ['http://domain.tld/path*path2', '<a href="http://domain.tld/path*path2">http://domain.tld/path*path2</a>'],
@@ -46,36 +46,38 @@ class Framework_StringReplacer extends PHPUnit\Framework\TestCase
             [' www.domain.tld/#!download|856p1|2 ', ' <a href="http://www.domain.tld/#!download|856p1|2">www.domain.tld/#!download|856p1|2</a> '],
             // #1489898: allow some unicode characters
             ['https://www.google.com/maps/place/New+York,+État+de+New+York/@40.7056308,-73.9780035,11z/data=!3m1!4b1!4m2!3m1!1s0x89c24fa5d33f083b:0xc80b8f06e177fe62',
-                '<a href="https://www.google.com/maps/place/New+York,+État+de+New+York/@40.7056308,-73.9780035,11z/data=!3m1!4b1!4m2!3m1!1s0x89c24fa5d33f083b:0xc80b8f06e177fe62">https://www.google.com/maps/place/New+York,+État+de+New+York/@40.7056308,-73.9780035,11z/data=!3m1!4b1!4m2!3m1!1s0x89c24fa5d33f083b:0xc80b8f06e177fe62</a>'
+                '<a href="https://www.google.com/maps/place/New+York,+État+de+New+York/@40.7056308,-73.9780035,11z/data=!3m1!4b1!4m2!3m1!1s0x89c24fa5d33f083b:0xc80b8f06e177fe62">https://www.google.com/maps/place/New+York,+État+de+New+York/@40.7056308,-73.9780035,11z/data=!3m1!4b1!4m2!3m1!1s0x89c24fa5d33f083b:0xc80b8f06e177fe62</a>',
             ],
         ];
     }
 
     /**
-     * @dataProvider data_replace
+     * @dataProvider provide_replace_cases
      */
-    function test_replace($input, $output)
+    public function test_replace($input, $output)
     {
-        $replacer = new rcube_string_replacer;
+        $replacer = new rcube_string_replacer();
         $result = $replacer->replace($input);
         $result = $replacer->resolve($result);
 
-        $this->assertEquals($output, $result);
+        $this->assertSame($output, $result);
     }
 
-    function test_linkrefs()
+    /**
+     * Test link references
+     */
+    public function test_linkrefs()
     {
-        $input = "This is a sample message [1] to test the new linkref [ref0] replacement feature of [Roundcube].\n";
-        $input.= "\n";
-        $input.= "[1] http://en.wikipedia.org/wiki/Email\n";
-        $input.= "[ref0] www.link-ref.com\n";
+        $input = "This is a sample message [1] to test the linkref [ref0] replacement feature of [Roundcube].[ref<0]\n"
+            . "[1] http://en.wikipedia.org/wiki/Email\n"
+            . "[ref0] www.link-ref.com\n";
 
-        $replacer = new rcube_string_replacer;
+        $replacer = new rcube_string_replacer();
         $result = $replacer->replace($input);
         $result = $replacer->resolve($result);
 
-        $this->assertStringContainsString('[<a href="http://en.wikipedia.org/wiki/Email">1</a>] to', $result, "Numeric linkref replacements");
-        $this->assertStringContainsString('[<a href="http://www.link-ref.com">ref0</a>] repl', $result, "Alphanum linkref replacements");
-        $this->assertStringContainsString('of [Roundcube].', $result, "Don't touch strings without an index entry");
+        $this->assertStringContainsString('[<a href="http://en.wikipedia.org/wiki/Email">1</a>] to', $result, 'Numeric linkref replacements');
+        $this->assertStringContainsString('[<a href="http://www.link-ref.com">ref0</a>] repl', $result, 'Alphanum linkref replacements');
+        $this->assertStringContainsString('of [Roundcube].[ref<0]', $result, "Don't touch strings without an index entry");
     }
 }

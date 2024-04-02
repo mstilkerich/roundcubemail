@@ -2,7 +2,9 @@
 
 namespace Tests\Browser\Mail;
 
-class GetunreadTest extends \Tests\Browser\TestCase
+use Tests\Browser\TestCase;
+
+class GetunreadTest extends TestCase
 {
     protected static $msgcount = 0;
 
@@ -35,7 +37,7 @@ class GetunreadTest extends \Tests\Browser\TestCase
             // Folders list state
             $browser->assertVisible('.folderlist li.inbox.unread');
 
-            $this->assertEquals(strval(self::$msgcount), $browser->text('.folderlist li.inbox span.unreadcount'));
+            $this->assertSame(strval(self::$msgcount), $browser->text('.folderlist li.inbox span.unreadcount'));
         });
     }
 }

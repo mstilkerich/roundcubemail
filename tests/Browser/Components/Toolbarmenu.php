@@ -2,8 +2,8 @@
 
 namespace Tests\Browser\Components;
 
-use Tests\Browser\Browser;
 use Laravel\Dusk\Component;
+use Tests\Browser\Browser;
 
 class Toolbarmenu extends Component
 {
@@ -21,15 +21,12 @@ class Toolbarmenu extends Component
      * Assert that the browser page contains the component.
      *
      * @param Browser $browser
-     *
-     * @return void
      */
-    public function assert($browser)
+    public function assert($browser): void
     {
         if ($browser->isPhone()) {
             $browser->assertPresent($this->selector());
-        }
-        else {
+        } else {
             $browser->assertVisible($this->selector());
         }
     }
@@ -50,36 +47,21 @@ class Toolbarmenu extends Component
      */
     public function assertMenuState($browser, $active, $disabled = [], $missing = [])
     {
-        // On phone the menu is invisible, open it
-        if ($browser->isPhone()) {
-            $browser->withinBody(function ($browser) {
-                // As we might be in a list or content "view" we have to find
-                // currently visible menu button, and click it
-                foreach ($browser->elements('.toolbar-menu-button') as $button) {
-                    if ($button->isDisplayed()) {
-                        $button->click();
-                    }
-                }
-
-                $browser->waitFor($this->selector());
-            });
-        }
+        $this->openMenu($browser);
 
         foreach ($active as $option) {
             // Print action is disabled on phones
             if ($option == 'print' && $browser->isPhone()) {
-                $browser->assertMissing("a.print");
-            }
-            else {
+                $browser->assertMissing('a.print');
+            } else {
                 $browser->assertVisible("a.{$option}:not(.disabled)");
             }
         }
 
         foreach ($disabled as $option) {
             if ($option == 'print' && $browser->isPhone()) {
-                $browser->assertMissing("a.print");
-            }
-            else {
+                $browser->assertMissing('a.print');
+            } else {
                 $browser->assertVisible("a.{$option}.disabled");
             }
         }
@@ -99,8 +81,8 @@ class Toolbarmenu extends Component
         // hide the menu back
         if ($browser->isPhone()) {
             $browser->withinBody(function ($browser) {
-                $browser->script("window.UI.menu_hide('toolbar-menu')");
-                $browser->waitUntilMissing($this->selector());
+                $browser->script("var elem; while(elem = \$('.popover.show .popover-header a.button:visible')[0]) \$(elem).click();");
+                $browser->waitUntilMissingOrStale($this->selector());
                 // FIXME: For some reason sometimes .popover-overlay does not close,
                 //        we have to remove it manually
                 $browser->script(
@@ -113,7 +95,31 @@ class Toolbarmenu extends Component
     /**
      * Select toolbar menu item
      */
-    public function clickMenuItem($browser, $name, $dropdown_action = null)
+    public function clickMenuItem($browser, $name, $dropdown_action = null, $close = true)
+    {
+        $this->openMenu($browser);
+
+        $selector = "a.{$name}" . ($dropdown_action ? ' + a.dropdown' : '');
+
+        $browser->click($selector);
+
+        if ($dropdown_action) {
+            $popup_id = $browser->attribute($selector, 'data-popup');
+            $browser->withinBody(static function ($browser) use ($popup_id, $dropdown_action) {
+                $browser->click("#{$popup_id} li a.{$dropdown_action}");
+            });
+        }
+
+        // Make sure the menu is closed on mobile
+        if ($close) {
+            $this->closeMenu($browser);
+        }
+    }
+
+    /**
+     * Open toolbar menu (on phones)
+     */
+    public function openMenu($browser)
     {
         if ($browser->isPhone()) {
             $browser->withinBody(function ($browser) {
@@ -126,18 +132,5 @@ class Toolbarmenu extends Component
                 $browser->waitFor($this->selector());
             });
         }
-
-        $selector = "a.{$name}" . ($dropdown_action ? " + a.dropdown" : '');
-
-        $browser->click($selector);
-
-        if ($dropdown_action) {
-            $popup_id = $browser->attribute($selector, 'data-popup');
-            $browser->withinBody(function ($browser) use ($popup_id, $dropdown_action) {
-                $browser->click("#{$popup_id} li a.{$dropdown_action}");
-            });
-        }
-
-        $this->closeMenu($browser);
     }
 }

@@ -2,17 +2,15 @@
 
 /**
  * Test class to test rcmail_action_settings_index
- *
- * @package Tests
  */
 class Actions_Settings_Index extends ActionTestCase
 {
     /**
      * Test run() method
      */
-    function test_run()
+    public function test_run()
     {
-        $action = new rcmail_action_settings_index;
+        $action = new rcmail_action_settings_index();
         $output = $this->initOutput(rcmail_action::MODE_HTTP, 'settings', 'preferences');
 
         $this->assertInstanceOf('rcmail_action', $action);
@@ -28,7 +26,7 @@ class Actions_Settings_Index extends ActionTestCase
     /**
      * Test sections_list() method
      */
-    function test_sections_list()
+    public function test_sections_list()
     {
         $result = rcmail_action_settings_index::sections_list([]);
         $this->assertTrue(strpos($result, '<table id="rcmsectionslist">') === 0);
@@ -37,7 +35,7 @@ class Actions_Settings_Index extends ActionTestCase
     /**
      * Test user_prefs() method
      */
-    function test_user_prefs()
+    public function test_user_prefs()
     {
         $result = rcmail_action_settings_index::user_prefs('general');
         $this->assertSame('general', $result[0]['general']['id']);
@@ -46,7 +44,7 @@ class Actions_Settings_Index extends ActionTestCase
     /**
      * Test get_skins() method
      */
-    function test_get_skins()
+    public function test_get_skins()
     {
         $result = rcmail_action_settings_index::get_skins();
         $this->assertContains('elastic', $result);
@@ -55,16 +53,24 @@ class Actions_Settings_Index extends ActionTestCase
     /**
      * Test settings_tabs() method
      */
-    function test_settings_tabs()
+    public function test_settings_tabs()
     {
         $result = rcmail_action_settings_index::settings_tabs([]);
-        $this->assertTrue(strpos($result, '<span id="settingstabpreferences" class="preferences selected"><a title="Edit user preferences" href="./?_task=settings&amp;_action=preferences"') === 0);
+        $nodes = getHTMLNodes($result, "//span[@id='settingstabpreferences']");
+
+        $this->assertCount(1, $nodes);
+        $this->assertSame('preferences selected', $nodes[0]->getAttribute('class'));
+        $this->assertCount(1, $nodes[0]->childNodes);
+        $link = $nodes[0]->firstChild;
+        $this->assertSame('a', $link->nodeName);
+        $this->assertSame('Edit user preferences', $link->getAttribute('title'));
+        $this->assertStringEndsWith('?_task=settings&_action=preferences', $link->getAttribute('href'));
     }
 
     /**
      * Test timezone_label() method
      */
-    function test_timezone_label()
+    public function test_timezone_label()
     {
         $result = rcmail_action_settings_index::timezone_label('Europe/Warsaw');
         $this->assertSame('Europe/Warsaw', $result);
@@ -73,7 +79,7 @@ class Actions_Settings_Index extends ActionTestCase
     /**
      * Test timezone_standard_time_label() method
      */
-    function test_timezone_standard_time_data()
+    public function test_timezone_standard_time_data()
     {
         $result = rcmail_action_settings_index::timezone_standard_time_data('UTC');
         $this->assertSame('+00:00', $result['offset']);
@@ -82,7 +88,7 @@ class Actions_Settings_Index extends ActionTestCase
     /**
      * Test attach_images() method
      */
-    function test_attach_images()
+    public function test_attach_images()
     {
         $result = rcmail_action_settings_index::attach_images('<p>test</p>', 'identity');
 
@@ -94,7 +100,7 @@ class Actions_Settings_Index extends ActionTestCase
     /**
      * Test wash_html() method
      */
-    function test_wash_html()
+    public function test_wash_html()
     {
         $result = rcmail_action_settings_index::wash_html('<p>test</p>');
 

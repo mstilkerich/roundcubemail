@@ -1,22 +1,21 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Test class to test rcube_addresses class
- *
- * @package Tests
  */
-class Framework_Addresses extends PHPUnit\Framework\TestCase
+class Framework_Addresses extends TestCase
 {
-
     /**
      * Class constructor
      */
-    function test_class()
+    public function test_class()
     {
-        $db     = new rcube_db('test');
+        $db = new rcube_db('test');
         $object = new rcube_addresses($db, null, 1);
 
-        $this->assertInstanceOf('rcube_addresses', $object, "Class constructor");
-        $this->assertInstanceOf('rcube_addressbook', $object, "Class constructor");
+        $this->assertInstanceOf('rcube_addresses', $object, 'Class constructor');
+        $this->assertInstanceOf('rcube_addressbook', $object, 'Class constructor');
     }
 }

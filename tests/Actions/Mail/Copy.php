@@ -2,17 +2,15 @@
 
 /**
  * Test class to test rcmail_action_mail_copy
- *
- * @package Tests
  */
 class Actions_Mail_Copy extends ActionTestCase
 {
     /**
      * Class constructor
      */
-    function test_class()
+    public function test_class()
     {
-        $object = new rcmail_action_mail_copy;
+        $object = new rcmail_action_mail_copy();
 
         $this->assertInstanceOf('rcmail_action', $object);
     }
@@ -20,24 +18,24 @@ class Actions_Mail_Copy extends ActionTestCase
     /**
      * Test copying a single message
      */
-    function test_copy_message()
+    public function test_copy_message()
     {
-        $action = new rcmail_action_mail_copy;
+        $action = new rcmail_action_mail_copy();
         $output = $this->initOutput(rcmail_action::MODE_AJAX, 'mail', 'copy');
 
         $this->assertTrue($action->checks());
 
         $_POST = [
-            '_uid'         => 1,
-            '_mbox'        => 'INBOX',
-            '_target_mbox' => 'Trash'
+            '_uid' => 1,
+            '_mbox' => 'INBOX',
+            '_target_mbox' => 'Trash',
         ];
 
         // Set expected storage function calls/results
-        $storage = rcmail::get_instance()->storage;
-        $storage->registerFunction('copy_message', true);
-        $storage->registerFunction('count', 30);
-        $storage->registerFunction('get_quota', false);
+        self::mockStorage()
+            ->registerFunction('copy_message', true)
+            ->registerFunction('count', 30)
+            ->registerFunction('get_quota', false);
 
         $this->runAndAssert($action, OutputJsonMock::E_EXIT);
 
@@ -53,22 +51,22 @@ class Actions_Mail_Copy extends ActionTestCase
     /**
      * Test copying error
      */
-    function test_copy_message_error()
+    public function test_copy_message_error()
     {
-        $action = new rcmail_action_mail_copy;
+        $action = new rcmail_action_mail_copy();
         $output = $this->initOutput(rcmail_action::MODE_AJAX, 'mail', 'copy');
 
         $_POST = [
-            '_uid'         => 1,
-            '_mbox'        => 'INBOX',
-            '_target_mbox' => 'Trash'
+            '_uid' => 1,
+            '_mbox' => 'INBOX',
+            '_target_mbox' => 'Trash',
         ];
 
         // Set expected storage function calls/results
-        $storage = rcmail::get_instance()->storage;
-        $storage->registerFunction('copy_message', false);
-        $storage->registerFunction('get_error_code', -1);
-        $storage->registerFunction('get_response_code', rcube_storage::READONLY);
+        self::mockStorage()
+            ->registerFunction('copy_message', false)
+            ->registerFunction('get_error_code', -1)
+            ->registerFunction('get_response_code', rcube_storage::READONLY);
 
         $this->runAndAssert($action, OutputJsonMock::E_EXIT);
 

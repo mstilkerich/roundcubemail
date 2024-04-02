@@ -1,6 +1,8 @@
 <?php
 
-class VirtuserQuery_Plugin extends PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+
+class VirtuserQuery_Plugin extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
@@ -10,13 +12,12 @@ class VirtuserQuery_Plugin extends PHPUnit\Framework\TestCase
     /**
      * Plugin object construction test
      */
-    function test_constructor()
+    public function test_constructor()
     {
-        $rcube  = rcube::get_instance();
+        $rcube = rcube::get_instance();
         $plugin = new virtuser_query($rcube->plugins);
 
         $this->assertInstanceOf('virtuser_query', $plugin);
         $this->assertInstanceOf('rcube_plugin', $plugin);
     }
 }
-

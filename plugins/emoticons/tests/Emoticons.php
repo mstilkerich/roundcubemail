@@ -1,6 +1,8 @@
 <?php
 
-class Emoticons_Plugin extends PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+
+class Emoticons_Plugin extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
@@ -10,9 +12,9 @@ class Emoticons_Plugin extends PHPUnit\Framework\TestCase
     /**
      * Plugin object construction test
      */
-    function test_constructor()
+    public function test_constructor()
     {
-        $rcube  = rcube::get_instance();
+        $rcube = rcube::get_instance();
         $plugin = new emoticons($rcube->plugins);
 
         $this->assertInstanceOf('emoticons', $plugin);

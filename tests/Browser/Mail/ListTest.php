@@ -3,8 +3,9 @@
 namespace Tests\Browser\Mail;
 
 use Tests\Browser\Components\Toolbarmenu;
+use Tests\Browser\TestCase;
 
-class ListTest extends \Tests\Browser\TestCase
+class ListTest extends TestCase
 {
     protected static $msgcount = 0;
 
@@ -31,7 +32,7 @@ class ListTest extends \Tests\Browser\TestCase
             // check message list
             $browser->assertVisible('#messagelist tbody tr:first-child.unread');
 
-            $this->assertEquals('Test HTML with local and remote image',
+            $this->assertSame('Test HTML with local and remote image',
                 $browser->text('#messagelist tbody tr:first-child span.subject'));
 
             // Note: This element icon has width=0, use assertPresent() not assertVisible()
@@ -41,49 +42,44 @@ class ListTest extends \Tests\Browser\TestCase
             $browser->assertVisible('#layout-list .header a.toolbar-button.refresh:not(.disabled)');
 
             if ($browser->isDesktop()) {
-                $browser->with('#toolbar-list-menu', function ($browser) {
+                $browser->with('#toolbar-list-menu', static function ($browser) {
                     $browser->assertVisible('a.select:not(.disabled)');
                     $browser->assertVisible('a.options:not(.disabled)');
 
                     $imap = \bootstrap::get_storage();
                     if ($imap->get_threading()) {
                         $browser->assertVisible('a.threads:not(.disabled)');
-                    }
-                    else {
+                    } else {
                         $browser->assertMissing('a.threads');
                     }
                 });
-            }
-            else if ($browser->isTablet()) {
+            } elseif ($browser->isTablet()) {
                 $browser->click('.toolbar-list-button')
                     ->waitFor('#toolbar-list-menu');
 
-                $browser->with('#toolbar-list-menu', function ($browser) {
+                $browser->with('#toolbar-list-menu', static function ($browser) {
                     $browser->assertVisible('a.select:not(.disabled)');
                     $browser->assertVisible('a.options:not(.disabled)');
 
                     $imap = \bootstrap::get_storage();
                     if ($imap->get_threading()) {
                         $browser->assertVisible('a.threads:not(.disabled)');
-                    }
-                    else {
+                    } else {
                         $browser->assertMissing('a.threads');
                     }
                 });
 
                 $browser->click(); // hide the popup menu
-            }
-            else { // phone
+            } else { // phone
                 // On phones list options are in the toolbar menu
-                $browser->with(new Toolbarmenu(), function ($browser) {
-                    $active  = ['select', 'options'];
+                $browser->with(new Toolbarmenu(), static function ($browser) {
+                    $active = ['select', 'options'];
                     $missing = [];
                     $imap = \bootstrap::get_storage();
 
                     if ($imap->get_threading()) {
                         $active[] = 'threads';
-                    }
-                    else {
+                    } else {
                         $missing[] = 'threads';
                     }
 
@@ -98,24 +94,22 @@ class ListTest extends \Tests\Browser\TestCase
      */
     public function testListSelection()
     {
-        $this->browse(function ($browser) {
+        $this->browse(static function ($browser) {
             if ($browser->isPhone()) {
-                $browser->with(new Toolbarmenu(), function ($browser) {
-                    $browser->clickMenuItem('select');
+                $browser->with(new Toolbarmenu(), static function ($browser) {
+                    $browser->clickMenuItem('select', null, false);
                 });
-            }
-            else if ($browser->isTablet()) {
+            } elseif ($browser->isTablet()) {
                 $browser->click('.toolbar-list-button');
                 $browser->click('#toolbar-list-menu a.select');
-            }
-            else {
+            } else {
                 $browser->click('#toolbar-list-menu a.select');
                 $browser->assertFocused('#toolbar-list-menu a.select');
             }
 
             // Popup menu content
             $browser->waitFor('#listselect-menu');
-            $browser->with('#listselect-menu', function($browser) {
+            $browser->with('#listselect-menu', static function ($browser) {
                 $browser->assertVisible('a.selection:not(.disabled)');
                 $browser->assertVisible('a.select.all:not(.disabled)');
                 $browser->assertVisible('a.select.page:not(.disabled)');

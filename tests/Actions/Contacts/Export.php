@@ -2,17 +2,15 @@
 
 /**
  * Test class to test rcmail_action_contacts_export
- *
- * @package Tests
  */
 class Actions_Contacts_Export extends ActionTestCase
 {
     /**
      * Test exporting all contacts
      */
-    function test_export_all()
+    public function test_export_all()
     {
-        $action = new rcmail_action_contacts_export;
+        $action = new rcmail_action_contacts_export();
         $output = $this->initOutput(rcmail_action::MODE_HTTP, 'contacts', 'export');
 
         $this->assertInstanceOf('rcmail_action', $action);
@@ -29,7 +27,7 @@ class Actions_Contacts_Export extends ActionTestCase
         $this->assertSame('ERROR: Request security check failed', trim(StderrMock::$output));
 
         // Now we'll try with the proper token
-        $_SESSION['request_token']           = 'secure';
+        $_SESSION['request_token'] = 'secure';
         $_SERVER['HTTP_X_ROUNDCUBE_REQUEST'] = 'secure';
 
         ob_start();
@@ -39,7 +37,7 @@ class Actions_Contacts_Export extends ActionTestCase
 
         $this->assertSame([
                 'Content-Type: text/vcard; charset=UTF-8',
-                'Content-Disposition: attachment; filename="contacts.vcf"'
+                'Content-Disposition: attachment; filename="contacts.vcf"',
             ], $output->headers
         );
         $this->assertSame(6, substr_count($vcf, 'BEGIN:VCARD'));
@@ -52,16 +50,16 @@ class Actions_Contacts_Export extends ActionTestCase
      *
      * @depends test_export_all
      */
-    function test_export_selected()
+    public function test_export_selected()
     {
-        $action = new rcmail_action_contacts_export;
+        $action = new rcmail_action_contacts_export();
         $output = $this->initOutput(rcmail_action::MODE_HTTP, 'contacts', 'export');
 
         $this->assertTrue($action->checks());
 
-        $cids   = [];
-        $db     = rcmail::get_instance()->get_dbh();
-        $query  = $db->query("SELECT `contact_id` FROM `contacts` WHERE `email` IN ('j.rian@gmail.com', 'g.bush@gov.com')");
+        $cids = [];
+        $db = rcmail::get_instance()->get_dbh();
+        $query = $db->query("SELECT `contact_id` FROM `contacts` WHERE `email` IN ('j.rian@gmail.com', 'g.bush@gov.com')");
         while ($result = $db->fetch_assoc($query)) {
             $cids[] = $result['contact_id'];
         }
@@ -70,7 +68,7 @@ class Actions_Contacts_Export extends ActionTestCase
         // TODO: This really shouldn't be needed
         $_REQUEST = ['_cid' => implode(',', $cids)];
 
-        $_SESSION['request_token']           = 'secure';
+        $_SESSION['request_token'] = 'secure';
         $_SERVER['HTTP_X_ROUNDCUBE_REQUEST'] = 'secure';
 
         ob_start();
@@ -80,7 +78,7 @@ class Actions_Contacts_Export extends ActionTestCase
 
         $this->assertSame([
                 'Content-Type: text/vcard; charset=UTF-8',
-                'Content-Disposition: attachment; filename="contacts.vcf"'
+                'Content-Disposition: attachment; filename="contacts.vcf"',
             ], $output->headers
         );
         $this->assertSame(2, substr_count($vcf, 'BEGIN:VCARD'));
@@ -95,7 +93,7 @@ class Actions_Contacts_Export extends ActionTestCase
      *
      * @depends test_export_all
      */
-    function test_export_search()
+    public function test_export_search()
     {
         $this->markTestIncomplete();
     }
@@ -103,7 +101,7 @@ class Actions_Contacts_Export extends ActionTestCase
     /**
      * Test prepare_for_export() method
      */
-    function test_prepare_for_export()
+    public function test_prepare_for_export()
     {
         $this->markTestIncomplete();
     }

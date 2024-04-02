@@ -2,11 +2,10 @@
 
 namespace Tests\Browser\Mail;
 
-use Tests\Browser\Components\App;
 use Tests\Browser\Components\Dialog;
-use Tests\Browser\Components\Popupmenu;
+use Tests\Browser\TestCase;
 
-class PreviewTest extends \Tests\Browser\TestCase
+class PreviewTest extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
@@ -35,7 +34,7 @@ class PreviewTest extends \Tests\Browser\TestCase
 
             // On phone check frame controls
             if ($browser->isPhone()) {
-                $browser->with('#layout-content .footer', function ($browser) {
+                $browser->with('#layout-content .footer', static function ($browser) {
                     $browser->assertVisible('a.button.prev.disabled')
                         ->assertVisible('a.button.next:not(.disabled)')
                         ->assertVisible('a.button.reply:not(.disabled)')
@@ -57,37 +56,68 @@ class PreviewTest extends \Tests\Browser\TestCase
                 $this->assertMatchesRegularExpression('/blocked/', $browser->attribute('p#v1remote > img', 'src'));
 
                 // Attachments list
-                $browser->with('#attachment-list', function ($browser) {
-                    $browser->assertVisible('li.image.ico')
-                        ->assertSeeIn('li .attachment-name', 'favicon.ico')
-                        ->assertSeeIn('li .attachment-size', '(~2 KB)')
-                        ->click('a.dropdown');
+                $browser->assertMissing('#attachment-list');
+            });
+
+            // On phone check Back button
+            if ($browser->isPhone()) {
+                $browser->click('#layout-content .header a.back-list-button')
+                    ->assertVisible('#messagelist');
+            }
+
+            $browser->click('#messagelist tbody tr:nth-child(2)')
+                ->waitForMessage('loading', 'Loading...')
+                ->waitFor('#messagecontframe')
+                ->waitUntilMissing('#messagestack');
+
+            // On phone check frame controls
+            if ($browser->isPhone()) {
+                $browser->with('#layout-content .footer', static function ($browser) {
+                    $browser->assertVisible('a.button.prev:not(.disabled)')
+                        ->assertVisible('a.button.next.disabled')
+                        ->assertVisible('a.button.reply:not(.disabled)');
+                });
+            }
+
+            $browser->withinFrame('#messagecontframe', static function ($browser) {
+                $browser->waitFor('img.contactphoto')
+                    ->assertMissing('#remote-objects-message');
+
+                // Attachments list
+                $browser->with('#attachment-list', static function ($browser) {
+                    $browser->assertVisible('li:nth-child(1).text.plain')
+                        ->assertSeeIn('li:nth-child(1) .attachment-name', 'lines.txt')
+                        ->assertSeeIn('li:nth-child(1) .attachment-size', '(~13 B)')
+                        ->assertVisible('li:nth-child(2).text.plain')
+                        ->assertSeeIn('li:nth-child(2) .attachment-name', 'lines_lf.txt')
+                        ->assertSeeIn('li:nth-child(2) .attachment-size', '(~11 B)')
+                        ->click('li:nth-child(1) a.dropdown');
                 });
 
                 if (!$browser->isPhone()) {
                     $browser->waitFor('#attachmentmenu')
-                        ->with('#attachmentmenu', function ($browser) {
-                            $browser->assertVisible('a.extwin.disabled')
+                        ->with('#attachmentmenu', static function ($browser) {
+                            $browser->assertVisible('a.extwin:not(.disabled)')
                                 ->assertVisible('a.download:not(.disabled)')
                                 ->click('a.download');
-                    });
+                        });
                 }
             });
 
             if ($browser->isPhone()) {
                 $browser->waitFor('#attachmentmenu-clone')
-                    ->with('#attachmentmenu-clone', function ($browser) {
-                        $browser->assertVisible('a.extwin.disabled')
+                    ->with('#attachmentmenu-clone', static function ($browser) {
+                        $browser->assertVisible('a.extwin:not(.disabled)')
                             ->assertVisible('a.download:not(.disabled)')
                             ->click('a.download');
                     });
             }
 
-            $ico = $browser->readDownloadedFile('favicon.ico');
+            $txt = $browser->readDownloadedFile('lines.txt');
 
-            $this->assertTrue(strlen($ico) == 2294);
-            $this->assertSame("\0\0\1\0", substr($ico, 0, 4));
-            $browser->removeDownloadedFile('favicon.ico');
+            $this->assertTrue(strlen($txt) == 13);
+            $this->assertSame("foo\r\nbar\r\ngna", $txt);
+            $browser->removeDownloadedFile('lines.txt');
 
             // On phone check Back button
             if ($browser->isPhone()) {
@@ -105,16 +135,16 @@ class PreviewTest extends \Tests\Browser\TestCase
      */
     public function testPreviewMorelink()
     {
-        $this->browse(function ($browser) {
+        $this->browse(static function ($browser) {
             $browser->go('mail');
 
             $browser->waitFor('#messagelist tbody tr:last-child')
                 ->click('#messagelist tbody tr:last-child')
-                //->waitForMessage('loading', 'Loading...')
+                // ->waitForMessage('loading', 'Loading...')
                 ->waitFor('#messagecontframe')
                 ->waitUntilMissing('#messagestack');
 
-            $browser->withinFrame('#messagecontframe', function ($browser) {
+            $browser->withinFrame('#messagecontframe', static function ($browser) {
                 $browser->waitFor('img.contactphoto');
 
                 $browser->assertSeeIn('.subject', 'Lines')
@@ -131,7 +161,7 @@ class PreviewTest extends \Tests\Browser\TestCase
                     ->click('.header.cc a.morelink');
             });
 
-            $browser->with(new Dialog(), function ($browser) {
+            $browser->with(new Dialog(), static function ($browser) {
                 $browser->assertDialogTitle('Cc')
                     ->assertDialogContent('test1@domain.tld')
                     ->assertDialogContent('test12@domain.tld')
@@ -139,39 +169,6 @@ class PreviewTest extends \Tests\Browser\TestCase
                     ->assertButton('cancel', 'Close')
                     ->clickButton('cancel');
             });
-
-            // Attachments list
-            $browser->withinFrame('#messagecontframe', function ($browser) {
-                $browser->with('#attachment-list', function ($browser) {
-                    $browser->assertElementsCount('li', 2)
-                        ->assertVisible('li.text.plain')
-                        ->assertSeeIn('li:first-child .attachment-name', 'lines.txt')
-                        ->assertSeeIn('li:first-child .attachment-size', '(~13 B)')
-                        ->assertSeeIn('li:last-child .attachment-name', 'lines_lf.txt')
-                        ->assertSeeIn('li:last-child .attachment-size', '(~11 B)')
-                        ->click('li:first-child a.dropdown');
-                });
-
-                if (!$browser->isPhone()) {
-                    $browser->waitFor('#attachmentmenu')
-                        ->with('#attachmentmenu', function ($browser) {
-                            $browser->assertVisible('a.extwin:not(.disabled)')
-                                ->assertVisible('a.download:not(.disabled)');
-                    });
-                }
-            });
-
-            if ($browser->isPhone()) {
-                $browser->waitFor('#attachmentmenu-clone')
-                    ->with('#attachmentmenu-clone', function ($browser) {
-                        $browser->assertVisible('a.extwin:not(.disabled)')
-                            ->assertVisible('a.download:not(.disabled)');
-                    })
-                    ->click('.popover a.cancel')
-                    ->waitUntilMissing('.popover')
-                    ->click('#layout-content .header a.back-list-button')
-                    ->assertVisible('#messagelist');
-            }
         });
     }
 }

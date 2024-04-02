@@ -1,8 +1,10 @@
 <?php
 
-class Archive_Plugin extends PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+
+class Archive_Plugin extends TestCase
 {
-    static function setUpBeforeClass(): void
+    public static function setUpBeforeClass(): void
     {
         include_once __DIR__ . '/../archive.php';
     }
@@ -10,9 +12,9 @@ class Archive_Plugin extends PHPUnit\Framework\TestCase
     /**
      * Plugin object construction test
      */
-    function test_constructor()
+    public function test_constructor()
     {
-        $rcube  = rcube::get_instance();
+        $rcube = rcube::get_instance();
         $plugin = new archive($rcube->plugins);
 
         $this->assertInstanceOf('archive', $plugin);
@@ -24,9 +26,9 @@ class Archive_Plugin extends PHPUnit\Framework\TestCase
     /**
      * Test prefs_table() method
      */
-    function test_prefs_table()
+    public function test_prefs_table()
     {
-        $rcube  = rcube::get_instance();
+        $rcube = rcube::get_instance();
         $plugin = new archive($rcube->plugins);
 
         $args = ['section' => 'server', 'blocks' => ['main' => ['options' => []]]];
@@ -49,34 +51,34 @@ class Archive_Plugin extends PHPUnit\Framework\TestCase
     /**
      * Test prefs_save() method
      */
-    function test_prefs_save()
+    public function test_prefs_save()
     {
-        $rcube  = rcube::get_instance();
+        $rcube = rcube::get_instance();
         $plugin = new archive($rcube->plugins);
 
         $_POST = [];
-        $args  = ['section' => 'folders', 'prefs' => []];
+        $args = ['section' => 'folders', 'prefs' => []];
 
         $result = $plugin->prefs_save($args);
 
         $this->assertSame('', $result['prefs']['archive_type']);
 
         $_POST = ['_archive_type' => 'aaa'];
-        $args  = ['section' => 'folders', 'prefs' => []];
+        $args = ['section' => 'folders', 'prefs' => []];
 
         $result = $plugin->prefs_save($args);
 
         $this->assertSame('aaa', $result['prefs']['archive_type']);
 
         $_POST = [];
-        $args  = ['section' => 'server', 'prefs' => []];
+        $args = ['section' => 'server', 'prefs' => []];
 
         $result = $plugin->prefs_save($args);
 
         $this->assertFalse($result['prefs']['read_on_archive']);
 
         $_POST = ['_read_on_archive' => 1];
-        $args  = ['section' => 'server', 'prefs' => []];
+        $args = ['section' => 'server', 'prefs' => []];
 
         $result = $plugin->prefs_save($args);
 

@@ -1,8 +1,10 @@
 <?php
 
-class Enigma_EnigmaError extends PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+
+class Enigma_EnigmaError extends TestCase
 {
-    static function setUpBeforeClass(): void
+    public static function setUpBeforeClass(): void
     {
         include_once __DIR__ . '/../lib/enigma_error.php';
     }
@@ -10,7 +12,7 @@ class Enigma_EnigmaError extends PHPUnit\Framework\TestCase
     /**
      * Test constructor
      */
-    function test_constructor()
+    public function test_constructor()
     {
         $error = new enigma_error(enigma_error::EXPIRED, 'message', ['test1' => 'test2']);
 
@@ -21,4 +23,3 @@ class Enigma_EnigmaError extends PHPUnit\Framework\TestCase
         $this->assertSame(['test1' => 'test2'], $error->getData());
     }
 }
-

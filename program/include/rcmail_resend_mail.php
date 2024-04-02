@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  +-----------------------------------------------------------------------+
  | This file is part of the Roundcube Webmail client                     |
  |                                                                       |
@@ -20,14 +20,11 @@
 
 /**
  * Mail_mime wrapper to handle mail resend/bounce
- *
- * @package Webmail
  */
 class rcmail_resend_mail extends Mail_mime
 {
     protected $orig_head;
     protected $orig_body;
-
 
     /**
      * Object constructor.
@@ -40,7 +37,7 @@ class rcmail_resend_mail extends Mail_mime
     {
         // To make the code simpler always use delay_file_io=true
         $params['delay_file_io'] = true;
-        $params['eol']           = "\r\n";
+        $params['eol'] = "\r\n";
 
         if (!isset($params['bounce_headers'])) {
             $params['bounce_headers'] = [];
@@ -84,11 +81,11 @@ class rcmail_resend_mail extends Mail_mime
             // txtHeaders() can be used to unset Bcc header
             if (array_key_exists($key, $headers)) {
                 $value = $headers[$key];
-                $this->build_params['bounce_headers']['Resent-'.$key] = $value;
+                $this->build_params['bounce_headers']['Resent-' . $key] = $value;
             }
 
             if ($value) {
-                $result[] = "$name: $value";
+                $result[] = "{$name}: {$value}";
             }
         }
 
@@ -112,6 +109,8 @@ class rcmail_resend_mail extends Mail_mime
         rename($this->orig_body, $file);
 
         $this->orig_head = null;
+
+        return true;
     }
 
     /**
@@ -123,10 +122,10 @@ class rcmail_resend_mail extends Mail_mime
             return;
         }
 
-        $rcmail   = rcmail::get_instance();
-        $storage  = $rcmail->get_storage();
-        $message  = $this->build_params['bounce_message'];
-        $path     = rcube_utils::temp_filename('bounce');
+        $rcmail = rcmail::get_instance();
+        $storage = $rcmail->get_storage();
+        $message = $this->build_params['bounce_message'];
+        $path = rcube_utils::temp_filename('bounce');
 
         // We'll write the body to the file and the headers to a variable
         if ($fp = fopen($path, 'w')) {
@@ -154,8 +153,6 @@ class rcmail_resend_mail extends Mail_mime
 /**
  * Stream filter to remove message headers from the streamed
  * message source (and store them in a variable)
- *
- * @package Webmail
  */
 class rcmail_bounce_stream_filter extends php_user_filter
 {
@@ -180,17 +177,17 @@ class rcmail_bounce_stream_filter extends php_user_filter
                     continue;
                 }
 
-                $bucket->data    = substr(self::$headers, $pos + 4);
+                $bucket->data = substr(self::$headers, $pos + 4);
                 $bucket->datalen = strlen($bucket->data);
 
                 self::$headers = substr(self::$headers, 0, $pos);
                 $this->in_body = true;
             }
 
-            $consumed += $bucket->datalen;
+            $consumed += (int) $bucket->datalen;
             stream_bucket_append($out, $bucket);
         }
 
-        return PSFS_PASS_ON;
+        return \PSFS_PASS_ON;
     }
 }

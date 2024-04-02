@@ -1,27 +1,26 @@
 <?php
 
-/**
- * Test class to test rcube_html class
- *
- * @package Tests
- */
-class Framework_Html extends PHPUnit\Framework\TestCase
-{
+use PHPUnit\Framework\TestCase;
 
+/**
+ * Test class to test html class
+ */
+class Framework_Html extends TestCase
+{
     /**
      * Class constructor
      */
-    function test_class()
+    public function test_class()
     {
-        $object = new html;
+        $object = new html();
 
-        $this->assertInstanceOf('html', $object, "Class constructor");
+        $this->assertInstanceOf('html', $object, 'Class constructor');
     }
 
     /**
      * Data for test_attrib_string()
      */
-    function data_attrib_string()
+    public static function provide_attrib_string_cases(): iterable
     {
         return [
             [
@@ -59,17 +58,18 @@ class Framework_Html extends PHPUnit\Framework\TestCase
 
     /**
      * Test for attrib_string()
-     * @dataProvider data_attrib_string
+     *
+     * @dataProvider provide_attrib_string_cases
      */
-    function test_attrib_string($arg1, $arg2, $expected)
+    public function test_attrib_string($arg1, $arg2, $expected)
     {
-        $this->assertEquals($expected, html::attrib_string($arg1, $arg2));
+        $this->assertSame($expected, html::attrib_string($arg1, $arg2));
     }
 
     /**
      * Data for test_quote()
      */
-    function data_quote()
+    public static function provide_quote_cases(): iterable
     {
         return [
             ['abc', 'abc'],
@@ -84,17 +84,18 @@ class Framework_Html extends PHPUnit\Framework\TestCase
 
     /**
      * Test for quote()
-     * @dataProvider data_quote
+     *
+     * @dataProvider provide_quote_cases
      */
-    function test_quote($str, $expected)
+    public function test_quote($str, $expected)
     {
-        $this->assertEquals($expected, html::quote($str));
+        $this->assertSame($expected, html::quote($str));
     }
 
     /**
      * Data for test_parse_attrib_string()
      */
-    function data_parse_attrib_string()
+    public static function provide_parse_attrib_string_cases(): iterable
     {
         return [
             [
@@ -126,10 +127,11 @@ class Framework_Html extends PHPUnit\Framework\TestCase
 
     /**
      * Test for parse_attrib_string()
-     * @dataProvider data_parse_attrib_string
+     *
+     * @dataProvider provide_parse_attrib_string_cases
      */
-    function test_parse_attrib_string($arg1, $expected)
+    public function test_parse_attrib_string($arg1, $expected)
     {
-        $this->assertEquals($expected, html::parse_attrib_string($arg1));
+        $this->assertSame($expected, html::parse_attrib_string($arg1));
     }
 }

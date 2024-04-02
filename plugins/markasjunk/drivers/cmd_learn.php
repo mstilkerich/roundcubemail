@@ -3,7 +3,7 @@
 /**
  * Command line learn driver
  *
- * @version 3.0
+ * @version 3.1
  *
  * @author Philip Weir
  * Patched by Julien Vehent to support DSPAM
@@ -40,23 +40,28 @@ class markasjunk_cmd_learn
 
     private function _do_salearn($uids, $spam, $src_mbox)
     {
-        $rcube    = rcube::get_instance();
+        $rcube = rcube::get_instance();
         $temp_dir = realpath($rcube->config->get('temp_dir'));
-        $command  = $rcube->config->get($spam ? 'markasjunk_spam_cmd' : 'markasjunk_ham_cmd');
-        $debug    = $rcube->config->get('markasjunk_debug');
+        $command = $rcube->config->get($spam ? 'markasjunk_spam_cmd' : 'markasjunk_ham_cmd');
+        $debug = $rcube->config->get('markasjunk_debug');
 
         if (!$command) {
             return;
         }
 
+        if (strpos($command, '%h') !== false) {
+            preg_match_all('/%h:([\w_-]+)/', $command, $header_names, \PREG_SET_ORDER);
+            $header_names = array_column($header_names, 1);
+        }
+
         // backwards compatibility %xds removed in markasjunk v1.12
         $command = str_replace('%xds', '%h:x-dspam-signature', $command);
-        $command = str_replace('%u', $_SESSION['username'], $command);
-        $command = str_replace('%l', $rcube->user->get_username('local'), $command);
-        $command = str_replace('%d', $rcube->user->get_username('domain'), $command);
+        $command = str_replace('%u', escapeshellarg($_SESSION['username']), $command);
+        $command = str_replace('%l', escapeshellarg($rcube->user->get_username('local')), $command);
+        $command = str_replace('%d', escapeshellarg($rcube->user->get_username('domain')), $command);
         if (strpos($command, '%i') !== false) {
             $identity = $rcube->user->get_identity();
-            $command  = str_replace('%i', $identity['email'], $command);
+            $command = str_replace('%i', escapeshellarg($identity['email']), $command);
         }
 
         foreach ($uids as $uid) {
@@ -64,28 +69,28 @@ class markasjunk_cmd_learn
             $tmp_command = $command;
 
             if (strpos($tmp_command, '%s') !== false) {
-                $message     = new rcube_message($uid);
+                $message = new rcube_message($uid);
                 $tmp_command = str_replace('%s', escapeshellarg($message->sender['mailto']), $tmp_command);
             }
 
-            if (strpos($command, '%h') !== false) {
+            if (!empty($header_names)) {
+                /** @var rcube_imap $storage */
                 $storage = $rcube->get_storage();
                 $storage->check_connection();
-                $storage->conn->select($src_mbox);
+                $headers = $storage->conn->fetchHeader($src_mbox, $uid, true, false, $header_names);
 
-                preg_match_all('/%h:([\w_-]+)/', $tmp_command, $header_names, PREG_SET_ORDER);
                 foreach ($header_names as $header) {
                     $val = null;
-                    if ($msg = $storage->conn->fetchHeader($src_mbox, $uid, true, false, [$header[1]])) {
-                        $val = !empty($msg->{$header[1]}) ? $msg->{$header[1]} : $msg->others[$header[1]];
+                    if ($headers) {
+                        $val = $headers->get($header);
+                        $val = is_array($val) ? array_first($val) : $val;
                     }
 
                     if (!empty($val)) {
-                        $tmp_command = str_replace($header[0], escapeshellarg($val), $tmp_command);
-                    }
-                    else {
+                        $tmp_command = str_replace('%h:' . $header, escapeshellarg($val), $tmp_command);
+                    } else {
                         if ($debug) {
-                            rcube::write_log('markasjunk', 'header ' . $header[1] . ' not found in message ' . $src_mbox . '/' . $uid);
+                            rcube::write_log('markasjunk', "header {$header} not found in message {$src_mbox}/{$uid}");
                         }
 
                         continue 2;
@@ -103,7 +108,7 @@ class markasjunk_cmd_learn
 
             if ($debug) {
                 if ($output) {
-                    $tmp_command .= "\n$output";
+                    $tmp_command .= "\n{$output}";
                 }
 
                 rcube::write_log('markasjunk', $tmp_command);

@@ -2,28 +2,26 @@
 
 /**
  * Test class to test rcube_user class
- *
- * @package Tests
  */
 class Framework_User extends ActionTestCase
 {
     /**
      * Test class constructor
      */
-    function test_constructor()
+    public function test_constructor()
     {
         self::initDB('init');
 
         $user = new rcube_user(1);
 
         $this->assertSame(1, $user->ID);
-        $this->assertSame(null, $user->language);
+        $this->assertNull($user->language);
     }
 
     /**
      * Test get_username()
      */
-    function test_get_username()
+    public function test_get_username()
     {
         self::initDB('init');
 
@@ -37,7 +35,7 @@ class Framework_User extends ActionTestCase
     /**
      * Test save_prefs() and get_prefs() and get_hash()
      */
-    function test_save_prefs()
+    public function test_save_prefs()
     {
         self::initDB('init');
 
@@ -67,7 +65,7 @@ class Framework_User extends ActionTestCase
     /**
      * Test identities related methods
      */
-    function test_list_emails_and_identities()
+    public function test_list_emails_and_identities()
     {
         self::initDB('init');
         self::initDB('identities');
@@ -107,8 +105,8 @@ class Framework_User extends ActionTestCase
         $this->assertSame('test-new', $ident['name']);
 
         $id = $user->insert_identity([
-                'name' => 'name',
-                'email' => 'add@ident.com',
+            'name' => 'name',
+            'email' => 'add@ident.com',
         ]);
 
         $this->assertTrue(is_numeric($id));
@@ -128,11 +126,11 @@ class Framework_User extends ActionTestCase
 
         $this->assertCount(3, $idents);
         $this->assertSame('add@ident.com', $idents[0]['email']);
-        $this->assertEquals(1, $idents[0]['standard']);
+        $this->{'assertEquals'}(1, $idents[0]['standard']);
         $this->assertSame('test@example.com', $idents[1]['email']);
-        $this->assertEquals(0, $idents[1]['standard']);
+        $this->{'assertEquals'}(0, $idents[1]['standard']);
         $this->assertSame('test@example.org', $idents[2]['email']);
-        $this->assertEquals(0, $idents[2]['standard']);
+        $this->{'assertEquals'}(0, $idents[2]['standard']);
 
         $ident = $user->delete_identity($default);
 
@@ -144,7 +142,7 @@ class Framework_User extends ActionTestCase
     /**
      * Test failed_login() and is_locked()
      */
-    function test_failed_login()
+    public function test_failed_login()
     {
         self::initDB('init');
 
@@ -154,7 +152,7 @@ class Framework_User extends ActionTestCase
 
         $user = new rcube_user(1);
 
-        $this->assertEquals(1, $user->data['failed_login_counter']);
+        $this->{'assertEquals'}(1, $user->data['failed_login_counter']);
 
         $this->assertFalse($user->is_locked());
     }
@@ -162,7 +160,7 @@ class Framework_User extends ActionTestCase
     /**
      * Test query()
      */
-    function test_query()
+    public function test_query()
     {
         self::initDB('init');
 
@@ -170,13 +168,13 @@ class Framework_User extends ActionTestCase
 
         $user = rcube_user::query('test@example.com', 'localhost');
 
-        $this->assertEquals(1, $user->ID);
+        $this->assertSame(1, $user->ID);
     }
 
     /**
      * Test create()
      */
-    function test_create()
+    public function test_create()
     {
         self::initDB('init');
 
@@ -190,13 +188,13 @@ class Framework_User extends ActionTestCase
 
         $this->assertCount(1, $idents);
         $this->assertSame('new@example.com', $idents[0]['email']);
-        $this->assertEquals(1, $idents[0]['standard']);
+        $this->{'assertEquals'}(1, $idents[0]['standard']);
     }
 
     /**
      * Test saved searches
      */
-    function test_saved_searches()
+    public function test_saved_searches()
     {
         $this->markTestIncomplete();
     }

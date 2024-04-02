@@ -1,6 +1,8 @@
 <?php
 
-class SquirrelmailUsercopy_Plugin extends PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+
+class SquirrelmailUsercopy_Plugin extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
@@ -10,9 +12,9 @@ class SquirrelmailUsercopy_Plugin extends PHPUnit\Framework\TestCase
     /**
      * Plugin object construction test
      */
-    function test_constructor()
+    public function test_constructor()
     {
-        $rcube  = rcube::get_instance();
+        $rcube = rcube::get_instance();
         $plugin = new squirrelmail_usercopy($rcube->plugins);
 
         $this->assertInstanceOf('squirrelmail_usercopy', $plugin);

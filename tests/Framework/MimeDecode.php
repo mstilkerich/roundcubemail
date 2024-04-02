@@ -1,16 +1,16 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Test class to test rcube_mime_decode class
- *
- * @package Tests
  */
-class Framework_MimeDecode extends PHPUnit\Framework\TestCase
+class Framework_MimeDecode extends TestCase
 {
     /**
      * Test mail decode
      */
-    function test_decode()
+    public function test_decode()
     {
         $mail = file_get_contents(TESTS_DIR . 'src/mail0.eml');
 

@@ -23,8 +23,7 @@ class identity_select extends rcube_plugin
 {
     public $task = 'mail';
 
-
-    function init()
+    public function init()
     {
         $this->add_hook('identity_select', [$this, 'select']);
         $this->add_hook('storage_init', [$this, 'storage_init']);
@@ -33,12 +32,18 @@ class identity_select extends rcube_plugin
     /**
      * Adds additional headers to supported headers list
      */
-    function storage_init($p)
+    public function storage_init($p)
     {
         $rcmail = rcmail::get_instance();
 
         if ($add_headers = (array) $rcmail->config->get('identity_select_headers', [])) {
-            $p['fetch_headers'] = trim($p['fetch_headers'] . ' ' . strtoupper(join(' ', $add_headers)));
+            $add_headers = strtoupper(implode(' ', $add_headers));
+
+            if (isset($p['fetch_headers'])) {
+                $p['fetch_headers'] .= ' ' . $add_headers;
+            } else {
+                $p['fetch_headers'] = $add_headers;
+            }
         }
 
         return $p;
@@ -47,7 +52,7 @@ class identity_select extends rcube_plugin
     /**
      * Identity selection
      */
-    function select($p)
+    public function select($p)
     {
         if ($p['selected'] !== null || empty($p['message']->headers)) {
             return $p;

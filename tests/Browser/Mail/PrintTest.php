@@ -4,8 +4,9 @@ namespace Tests\Browser\Mail;
 
 use Tests\Browser\Components\App;
 use Tests\Browser\Components\Popupmenu;
+use Tests\Browser\TestCase;
 
-class PrintTest extends \Tests\Browser\TestCase
+class PrintTest extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
@@ -29,7 +30,7 @@ class PrintTest extends \Tests\Browser\TestCase
             $browser->waitFor('#messagelist tbody tr:first-child')
                 ->ctrlClick('#messagelist tbody tr:first-child');
 
-            $browser->clickToolbarMenuItem('more');
+            $browser->clickToolbarMenuItem('more', null, false);
 
             $browser->with(new Popupmenu('message-menu'), function ($browser) use (&$current_window, &$new_window) {
                 if ($browser->isPhone()) {
@@ -37,17 +38,17 @@ class PrintTest extends \Tests\Browser\TestCase
                     $this->markTestSkipped();
                 }
 
-                list($current_window, $new_window) = $browser->openWindow(function ($browser) {
+                [$current_window, $new_window] = $browser->openWindow(static function ($browser) {
                     $browser->clickMenuItem('print');
                 });
             });
 
             $browser->driver->switchTo()->window($new_window);
 
-            $browser->with(new App(), function ($browser) {
+            $browser->with(new App(), static function ($browser) {
                 $browser->assertEnv([
-                        'task' => 'mail',
-                        'action' => 'print',
+                    'task' => 'mail',
+                    'action' => 'print',
                 ]);
             });
 
@@ -56,7 +57,7 @@ class PrintTest extends \Tests\Browser\TestCase
                 ->assertSeeIn('.message-part div.pre', 'Plain text message body.')
                 ->assertVisible('.message-part div.pre .sig')
                 // Tests "more recipients" link
-                ->with('.header-headers .header.cc', function ($browser) {
+                ->with('.header-headers .header.cc', static function ($browser) {
                     $browser->assertSee('test10@domain.tld')
                         ->assertDontSee('test11@domain.tld')
                         ->assertSeeIn('a.morelink', '2 more...')

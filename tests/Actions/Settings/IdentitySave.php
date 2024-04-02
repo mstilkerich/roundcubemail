@@ -2,17 +2,15 @@
 
 /**
  * Test class to test rcmail_action_settings_identity_save
- *
- * @package Tests
  */
 class Actions_Settings_IdentitySave extends ActionTestCase
 {
     /**
      * Test run() method
      */
-    function test_identity_edit()
+    public function test_identity_edit()
     {
-        $action = new rcmail_action_settings_identity_save;
+        $action = new rcmail_action_settings_identity_save();
         $output = $this->initOutput(rcmail_action::MODE_HTTP, 'settings', 'save-identity');
 
         $this->assertInstanceOf('rcmail_action', $action);
@@ -20,8 +18,8 @@ class Actions_Settings_IdentitySave extends ActionTestCase
 
         self::initDB('identities');
 
-        $db       = rcmail::get_instance()->get_dbh();
-        $query    = $db->query('SELECT * FROM `identities` WHERE `standard` = 1 LIMIT 1');
+        $db = rcmail::get_instance()->get_dbh();
+        $query = $db->query('SELECT * FROM `identities` WHERE `standard` = 1 LIMIT 1');
         $identity = $db->fetch_assoc($query);
 
         // Test successful identity update
@@ -39,7 +37,7 @@ class Actions_Settings_IdentitySave extends ActionTestCase
         $this->assertSame('edit-identity', rcmail::get_instance()->action);
         $this->assertSame('successfullysaved', $output->getProperty('message'));
 
-        $query    = $db->query('SELECT * FROM `identities` WHERE `identity_id` = ?', $identity['identity_id']);
+        $query = $db->query('SELECT * FROM `identities` WHERE `identity_id` = ?', $identity['identity_id']);
         $identity = $db->fetch_assoc($query);
 
         $this->assertSame('new-name', $identity['name']);
@@ -51,7 +49,7 @@ class Actions_Settings_IdentitySave extends ActionTestCase
     /**
      * Test run() method for a new identity
      */
-    function test_new_identity()
+    public function test_new_identity()
     {
         $this->markTestIncomplete();
     }
@@ -59,7 +57,7 @@ class Actions_Settings_IdentitySave extends ActionTestCase
     /**
      * Test run() method errors handling
      */
-    function test_run_errors()
+    public function test_run_errors()
     {
         $this->markTestIncomplete();
     }
