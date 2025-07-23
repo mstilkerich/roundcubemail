@@ -1,6 +1,15 @@
-CHANGELOG Roundcube Webmail
-===========================
+# Changelog Roundcube Webmail
 
+- Fix cross-site scripting (XSS) vulnerability in setting Content-Type/Content-Disposition for attachment preview/download
+
+RELEASE 1.4.15
+--------------
+- Fix cross-site scripting (XSS) vulnerability in handling of SVG in HTML messages (#9168)
+- Fix PHP 5.4 compatibility by using pear-core-minimal 1.10.11 (#9148)
+
+RELEASE 1.4.14
+--------------
+- Fix cross-site scripting (XSS) vulnerability in handling of linkrefs in plain text messages
 - Enigma: Fix initial synchronization of private keys
 
 RELEASE 1.4.13
